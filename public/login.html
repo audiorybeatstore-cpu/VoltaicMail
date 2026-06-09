@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoltaicMail — Access Portal</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // Paste your exact Firebase Config credentials object here
+        const firebaseConfig = {
+            apiKey: "AIzaSyDeXtcz_9-6wKkkJ8nCvfYqQZaXT-U0Kug",
+            authDomain: "voltaicmail.firebaseapp.com",
+            projectId: "voltaicmail",
+            storageBucket: "voltaicmail.firebasestorage.app",
+            messagingSenderId: "38028187708",
+            appId: "1:38028187708:web:0c3392daea863e1d3d0b39",
+            measurementId: "G-E1Z1BMNKL2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Active Session Guard Router
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = '/index.html';
+            }
+        });
+
+        // 🔐 Action Mechanism 1: User Login Auth Dispatch
+        window.executeSignIn = async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            const errBox = document.getElementById('login-error');
+            errBox.style.display = 'none';
+
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                window.location.href = '/index.html';
+            } catch (error) {
+                errBox.innerText = error.message.replace("Firebase: ", "");
+                errBox.style.display = 'block';
+            }
+        }
+
+        // 🔐 Action Mechanism 2: User Account Creation Dispatch
+        window.executeSignUp = async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('reg-email').value;
+            const pass = document.getElementById('reg-pass').value;
+            const errBox = document.getElementById('reg-error');
+            errBox.style.display = 'none';
+
+            try {
+                await createUserWithEmailAndPassword(auth, email, pass);
+                window.location.href = '/index.html';
+            } catch (error) {
+                errBox.innerText = error.message.replace("Firebase: ", "");
+                errBox.style.display = 'block';
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --bg-main: #000000;
+            --border-color: #111111;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --interactive-hover: #161616;
+            --transition-speed: 0.25s;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .auth-master-wrapper {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px 24px;
+            position: relative;
+        }
+
+        .brand-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--text-primary);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .brand-logo i { width: 16px; height: 16px; }
+        h1 { font-size: 20px; font-weight: 500; letter-spacing: -0.4px; }
+        p.subtitle { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
+
+        /* Dynamic Panel Toggle Container */
+        .auth-view-card { display: none; }
+        .auth-view-card.active { display: block; animation: slideUp var(--transition-speed) cubic-bezier(0.16, 1, 0.3, 1); }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500; }
+        input { width: 100%; padding: 12px 14px; background: #050505; border: 1px solid var(--border-color); border-radius: 6px; color: #fff; margin-bottom: 24px; font-size: 13px; transition: border-color var(--transition-speed); }
+        input:focus { border-color: #333333; outline: none; background: #000; }
+
+        .btn-submit { width: 100%; background-color: #ffffff; color: #000000; padding: 12px; border-radius: 6px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; transition: opacity var(--transition-speed); display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-submit:hover { opacity: 0.9; }
+
+        .switch-prompt { text-align: center; font-size: 13px; color: var(--text-secondary); margin-top: 24px; }
+        .switch-link { color: var(--text-primary); text-decoration: none; cursor: pointer; font-weight: 500; }
+        .switch-link:hover { text-decoration: underline; }
+
+        .error-banner { background-color: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; font-size: 13px; padding: 12px; border-radius: 6px; margin-bottom: 24px; display: none; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+    <div class="auth-master-wrapper">
+        <div class="brand-header">
+            <div class="brand-logo"><i data-lucide="zap"></i></div>
+            <div>
+                <h1>VoltaicMail</h1>
+                <p class="subtitle">Secure Delivery Communication Platform Engine</p>
+            </div>
+        </div>
+
+        <!-- VIEW A: SIGN IN FORM -->
+        <div id="panel-login" class="auth-view-card active">
+            <div class="error-banner" id="login-error"></div>
+            <form onsubmit="executeSignIn(event)">
+                <label>Account Email Address</label>
+                <input type="email" id="login-email" required autocomplete="username">
+                
+                <label>Security Access Password</label>
+                <input type="password" id="login-pass" required autocomplete="current-password">
+
+                <button type="submit" class="btn-submit">Sign in to Dashboard <i data-lucide="arrow-right" style="width:14px; height:14px;"></i></button>
+            </form>
+            <div class="switch-prompt">Don't have an account? <span class="switch-link" onclick="toggleAuthPanel('register')">Sign up free</span></div>
+        </div>
+
+        <!-- VIEW B: SIGN UP FORM -->
+        <div id="panel-register" class="auth-view-card">
+            <div class="error-banner" id="reg-error"></div>
+            <form onsubmit="executeSignUp(event)">
+                <label>Your Workspace Email Address</label>
+                <input type="email" id="reg-email" required autocomplete="username">
+                
+                <label>Create API Authorization Password</label>
+                <input type="password" id="reg-pass" required autocomplete="new-password">
+
+                <button type="submit" class="btn-submit">Create Developer Account <i data-lucide="arrow-right" style="width:14px; height:14px;"></i></button>
+            </form>
+            <div class="switch-prompt">Already possess an active profile? <span class="switch-link" onclick="toggleAuthPanel('login')">Sign in</span></div>
+        </div>
+    </div>
+
+    <script>
+        function toggleAuthPanel(target) {
+            document.querySelectorAll('.auth-view-card').forEach(p => p.classList.remove('active'));
+            if(target === 'register') {
+                document.getElementById('panel-register').classList.add('active');
+            } else {
+                document.getElementById('panel-login').classList.add('active');
+            }
+        }
+        window.onload = () => { lucide.createIcons(); }
+    </script>
+</body>
+</html>
