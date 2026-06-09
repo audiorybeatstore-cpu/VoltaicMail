@@ -190,6 +190,9 @@ app.get('/api/dashboard-data', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`⚡ VoltaicMail Engine live at http://localhost:${PORT}`);
+// Dynamic production environment port configuration mapping
+const RUNTIME_PORT = process.env.PORT || PORT;
+
+app.listen(RUNTIME_PORT, '0.0.0.0', () => {
+    console.log(`⚡ VoltaicMail Engine live in production on port ${RUNTIME_PORT}`);
 });
