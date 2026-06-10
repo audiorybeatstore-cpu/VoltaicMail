@@ -3,29 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoltaicMail - Access Management</title>
+    <title>VoltaicMail - Production Delivery Infrastructure Access</title>
     <style>
         body { background: #060913; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .auth-container { background: #0b1120; border: 1px solid #1e293b; padding: 40px; border-radius: 12px; width: 100%; max-width: 420px; box-sizing: border-box; }
+        .auth-container { background: #0b1120; border: 1px solid #1e293b; padding: 40px; border-radius: 12px; width: 100%; max-width: 440px; box-sizing: border-box; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
         .tabs { display: flex; border-bottom: 1px solid #1e293b; margin-bottom: 25px; }
-        .tab-btn { flex: 1; padding: 12px; text-align: center; cursor: pointer; color: #64748b; font-weight: 600; border-bottom: 2px solid transparent; }
+        .tab-btn { flex: 1; padding: 12px; text-align: center; cursor: pointer; color: #64748b; font-weight: 600; border-bottom: 2px solid transparent; transition: all 0.2s; }
         .tab-btn.active { color: #3b82f6; border-color: #3b82f6; }
-        .form-group { margin-bottom: 20px; position: relative; }
+        .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-size: 14px; color: #94a3b8; font-weight: 500; }
-        input { width: 100%; background: #0f172a; border: 1px solid #334155; padding: 12px 16px; border-radius: 8px; color: #ffffff; font-size: 15px; box-sizing: border-box; outline: none; transition: border 0.15s; }
+        input { width: 100%; background: #0f172a; border: 1px solid #334155; padding: 12px 16px; border-radius: 8px; color: #ffffff; font-size: 15px; box-sizing: border-box; outline: none; transition: border-color 0.15s; }
         input:focus { border-color: #3b82f6; }
         .password-wrapper { position: relative; display: flex; align-items: center; }
-        .toggle-password { position: absolute; right: 14px; cursor: pointer; display: flex; align-items: center; color: #64748b; }
+        .toggle-password { position: absolute; right: 14px; cursor: pointer; display: flex; align-items: center; color: #64748b; background: none; border: none; padding: 0; }
         .toggle-password:hover { color: #94a3b8; }
-        .toggle-password svg { width: 20px; height: 20px; }
-        button { width: 100%; background: #2563eb; color: #ffffff; border: none; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.15s; margin-top: 10px; }
-        button:hover { background: #1d4ed8; }
-        .msg { margin-top: 15px; font-size: 14px; text-align: center; line-height: 1.5; }
-        .msg-success { color: #10b981; }
-        .msg-error { color: #ef4444; }
-        .verify-link-wrapper { background: #15213d; border: 1px solid #1e3a8a; padding: 12px; border-radius: 6px; margin-top: 15px; word-break: break-all; text-align: left; }
-        .verify-link-wrapper a { color: #60a5fa; font-weight: 600; text-decoration: none; }
-        .verify-link-wrapper a:hover { text-decoration: underline; }
+        .toggle-password svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        button.submit-btn { width: 100%; background: #2563eb; color: #ffffff; border: none; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.15s; margin-top: 10px; }
+        button.submit-btn:hover { background: #1d4ed8; }
+        .msg { margin-top: 15px; font-size: 14px; text-align: center; line-height: 1.5; padding: 12px; border-radius: 6px; display: none; }
+        .msg-success { color: #10b981; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .msg-error { color: #ef4444; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); }
+        .verification-card { background: #15213d; border: 1px solid #1e3a8a; padding: 14px; border-radius: 8px; margin-top: 15px; text-align: left; }
+        .verification-card p { margin: 0 0 10px 0; font-size: 13px; color: #94a3b8; }
+        .verification-card a { color: #60a5fa; font-weight: 600; text-decoration: none; word-break: break-all; font-family: monospace; }
+        .verification-card a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -46,19 +47,20 @@
                 <label for="password">Password</label>
                 <div class="password-wrapper">
                     <input type="password" id="password" required placeholder="••••••••">
-                    <span class="toggle-password" onclick="togglePasswordVisibility('password')">
-                        <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility()" aria-label="Toggle password visibility">
+                        <svg id="eyeIcon" viewBox="0 0 24 24">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                             <circle cx="12" cy="12" r="3"></circle>
                         </svg>
-                    </span>
+                    </button>
                 </div>
             </div>
 
-            <button type="submit" id="submitBtn">Authenticate</button>
+            <button type="submit" class="submit-btn" id="submitBtn">Authenticate</button>
         </form>
 
         <div id="feedbackMsg" class="msg"></div>
+        <div id="verifyBlock" style="display: none;"></div>
     </div>
 
     <script>
@@ -66,30 +68,19 @@
 
         function switchAuthMode(mode) {
             currentMode = mode;
-            const loginTab = document.getElementById('loginTab');
-            const signupTab = document.getElementById('signupTab');
-            const submitBtn = document.getElementById('submitBtn');
-            const feedbackMsg = document.getElementById('feedbackMsg');
-            
-            feedbackMsg.innerHTML = '';
-            
-            if (mode === 'login') {
-                loginTab.classList.add('active');
-                signupTab.classList.remove('active');
-                submitBtn.innerText = 'Authenticate';
-            } else {
-                signupTab.classList.add('active');
-                loginTab.classList.remove('active');
-                submitBtn.innerText = 'Register Platform Instance';
-            }
+            document.getElementById('loginTab').classList.toggle('active', mode === 'login');
+            document.getElementById('signupTab').classList.toggle('active', mode === 'signup');
+            document.getElementById('submitBtn').innerText = mode === 'login' ? 'Authenticate' : 'Register Platform Instance';
+            document.getElementById('feedbackMsg').style.display = 'none';
+            document.getElementById('verifyBlock').style.display = 'none';
         }
 
-        function togglePasswordVisibility(fieldId) {
-            const input = document.getElementById(fieldId);
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
             const eyeIcon = document.getElementById('eyeIcon');
             
-            if (input.type === 'password') {
-                input.type = 'text';
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
                 eyeIcon.innerHTML = `
                     <line x1="1" y1="1" x2="23" y2="23"></line>
                     <path d="M9 9a3 3 0 1 1-4.24-4.24"></path>
@@ -97,7 +88,7 @@
                     <circle cx="12" cy="12" r="3"></circle>
                 `;
             } else {
-                input.type = 'password';
+                passwordInput.type = 'password';
                 eyeIcon.innerHTML = `
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                     <circle cx="12" cy="12" r="3"></circle>
@@ -109,9 +100,11 @@
             event.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const feedbackMsg = document.getElementById('feedbackMsg');
+            const msg = document.getElementById('feedbackMsg');
+            const verifyBlock = document.getElementById('verifyBlock');
             
-            feedbackMsg.innerHTML = '';
+            msg.style.display = 'none';
+            verifyBlock.style.display = 'none';
 
             if (currentMode === 'signup') {
                 try {
@@ -121,26 +114,28 @@
                         body: JSON.stringify({ email, password })
                     });
                     const data = await res.json();
-                    
                     if (!res.ok) throw new Error(data.error || 'Registration failed.');
                     
-                    feedbackMsg.className = 'msg msg-success';
-                    feedbackMsg.innerHTML = `
-                        <div>Registration complete. Please simulate email validation by clicking the active token link below:</div>
-                        <div class="verify-link-wrapper">
-                            <a href="${data.verifyLink}" target="_blank">Verify Account Framework</a>
-                        </div>
+                    msg.className = 'msg msg-success';
+                    msg.innerText = 'Account provisioned successfully. Activation framework required.';
+                    msg.style.display = 'block';
+
+                    verifyBlock.className = 'verification-card';
+                    verifyBlock.innerHTML = `
+                        <p><strong>Security Sandbox:</strong> Please verify your email by executing this activation endpoint token:</p>
+                        <a href="${data.verifyLink}" target="_blank">${window.location.origin}${data.verifyLink}</a>
                     `;
+                    verifyBlock.style.display = 'block';
                 } catch (err) {
-                    feedbackMsg.className = 'msg msg-error';
-                    feedbackMsg.innerText = err.message;
+                    msg.className = 'msg msg-error';
+                    msg.innerText = err.message;
+                    msg.style.display = 'block';
                 }
             } else {
-                feedbackMsg.className = 'msg msg-success';
-                feedbackMsg.innerText = 'Authentication successful! Loading workspace...';
-                setTimeout(() => {
-                    window.location.href = '/index.html';
-                }, 1000);
+                msg.className = 'msg msg-success';
+                msg.innerText = 'Validation confirmed. Initializing workspace...';
+                msg.style.display = 'block';
+                setTimeout(() => { window.location.href = '/index.html'; }, 800);
             }
         }
     </script>
