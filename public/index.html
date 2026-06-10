@@ -3,617 +3,415 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoltaicMail - System Management Hub</title>
+    <title>VoltaicMail Core Delivery Dashboard</title>
     <style>
-        body { background: #060913; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; margin: 0; display: flex; overflow: hidden; min-height: 100vh; }
-        aside { width: 280px; background: #0b1120; height: 100vh; padding: 25px 15px; border-right: 1px solid #1e293b; box-sizing: border-box; display: flex; flex-direction: column; }
-        .brand { font-size: 19px; font-weight: 800; color: #3b82f6; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; padding-left: 10px; }
-        .brand svg { width: 22px; height: 22px; fill: currentColor; }
-        .nav-wrapper { flex: 1; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
-        .nav-item { padding: 11px 14px; cursor: pointer; border-radius: 6px; font-weight: 600; color: #94a3b8; display: flex; align-items: center; gap: 10px; transition: all 0.15s; font-size: 14px; }
-        .nav-item svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
-        .nav-item:hover, .nav-item.active { background: #1d4ed8; color: #ffffff; }
-        main { flex: 1; padding: 35px 40px; overflow-y: auto; height: 100vh; box-sizing: border-box; background: #070a13; }
-        .panel { display: none; }
-        .metric-cards-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 20px 0; }
-        .card { background: #0f172a; padding: 20px; border-radius: 10px; border: 1px solid #1e293b; }
-        .card h5 { margin: 0 0 6px 0; color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
-        .card p { margin: 0; font-size: 26px; font-weight: 800; color: #ffffff; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #0b1120; border-radius: 8px; overflow: hidden; border: 1px solid #1e293b; }
-        th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #1e293b; font-size: 13px; }
-        th { background: #0f172a; color: #94a3b8; font-weight: 600; }
-        input, select, button, textarea { background: #0f172a; color: #ffffff; border: 1px solid #334155; padding: 10px 14px; border-radius: 6px; font-size: 13px; outline: none; box-sizing: border-box; }
-        input:focus, select:focus, textarea:focus { border-color: #3b82f6; }
-        button { background: #2563eb; border: none; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s; color: white; }
+        :root { --bg: #060913; --panel: #0b1120; --border: #1e293b; --text: #e2e8f0; --accent: #2563eb; }
+        body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; margin: 0; padding: 0; display: flex; height: 100vh; overflow: hidden; }
+        aside { width: 260px; background: var(--panel); border-right: 1px solid var(--border); padding: 20px; display: flex; flex-direction: column; }
+        main { flex: 1; padding: 40px; overflow-y: auto; background: var(--bg); }
+        .nav-item { padding: 12px; margin-bottom: 4px; border-radius: 6px; color: #94a3b8; cursor: pointer; font-weight: 500; }
+        .nav-item:hover, .nav-item.active { background: #1e293b; color: #fff; }
+        .sub-nav { margin-left: 15px; font-size: 13px; display: none; }
+        .sub-nav.open { display: block; }
+        .card { background: var(--panel); border: 1px solid var(--border); padding: 24px; border-radius: 8px; margin-bottom: 24px; }
+        input, select, textarea { background: #1e293b; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+        button { background: var(--accent); color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
         button:hover { background: #1d4ed8; }
-        button.secondary { background: #1e293b; border: 1px solid #334155; }
-        button.secondary:hover { background: #334155; }
-        button.danger { background: #7f1d1d; border: 1px solid #991b1b; }
-        button.danger:hover { background: #991b1b; }
-        .sub-nav { display: flex; gap: 6px; border-bottom: 1px solid #1e293b; padding-bottom: 10px; margin-bottom: 20px; }
-        .sub-nav span { cursor: pointer; color: #64748b; font-weight: 600; padding: 6px 12px; border-radius: 4px; font-size: 13px; }
-        .sub-nav span.active-sub { color: #3b82f6; background: #1e293b; }
-        .doc-box { background: #0b1120; border: 1px solid #1e293b; border-left: 4px solid #2563eb; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-        .doc-box h4 { margin: 0 0 8px 0; color: #ffffff; font-size: 15px; }
-        .doc-box p { margin: 0; font-size: 13px; color: #94a3b8; line-height: 1.5; }
-        .form-layout-inline { display: flex; gap: 12px; margin-bottom: 15px; align-items: flex-end; flex-wrap: wrap; }
-        .field-group { display: flex; flex-direction: column; gap: 6px; }
-        .field-group label { font-size: 12px; color: #94a3b8; font-weight: 500; }
-        .badge { padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-        .badge-live { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
-        .badge-hold { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
-        pre { background: #0f172a; padding: 15px; border-radius: 6px; border: 1px solid #1e293b; color: #38bdf8; overflow-x: auto; font-family: monospace; font-size: 13px; margin: 10px 0 0 0; }
-        .timeline-container { border-left: 2px dashed #334155; margin: 15px 5px; padding-left: 20px; }
-        .timeline-node { background: #0f172a; border: 1px solid #1e293b; padding: 14px; margin-bottom: 12px; border-radius: 8px; display: flex; align-items: center; gap: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); }
+        th { color: #94a3b8; font-size: 13px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px; }
+        #auth-gate { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-    <aside>
-        <div class="brand">
-            <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            <span>VoltaicMail Core</span>
+    <div id="auth-gate">
+        <div class="card" style="width: 400px; text-align: center;">
+            <h2 style="color: var(--accent);">VoltaicMail Identity</h2>
+            <p style="color:#94a3b8; font-size:13px;">Verify your identity to read documents and manage projects.</p>
+            <input type="email" id="auth-email" placeholder="Email Address" style="width:100%; margin-bottom:12px;"><br>
+            <input type="password" id="auth-password" placeholder="Password" style="width:100%; margin-bottom:16px;"><br>
+            <button onclick="handleLogin()" style="width:100%; margin-bottom:10px;">Sign In to Engine</button>
+            <button onclick="handleSignup()" style="background:#059669; width:100%;">Register Account Pipeline</button>
+            <p id="auth-msg" style="color: #ef4444; font-size:12px; margin-top:10px;"></p>
         </div>
-        <nav class="nav-wrapper">
-            <div class="nav-item active" onclick="navigate('metrics')">
-                <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                Metrics Dashboard
-            </div>
-            <div class="nav-item" onclick="navigate('audience')">
-                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
-                Audience Hub
-            </div>
-            <div class="nav-item" onclick="navigate('broadcast')">
-                <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                Broadcast Engine
-            </div>
-            <div class="nav-item" onclick="navigate('automations')">
-                <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                Automation Matrix
-            </div>
-            <div class="nav-item" onclick="navigate('templates')">
-                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                Layout Blueprints
-            </div>
-            <div class="nav-item" onclick="navigate('domains')">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>
-                Domain Registries
-            </div>
-            <div class="nav-item" onclick="navigate('logs')">
-                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="9"></line><line x1="9" y1="13" x2="15" y2="13"></line></svg>
-                Diagnostic Logs
-            </div>
-            <div class="nav-item" onclick="navigate('api')">
-                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                API Tokens
-            </div>
-            <div class="nav-item" onclick="navigate('webhooks')">
-                <svg viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
-                Webhook Streams
-            </div>
-            <div class="nav-item" onclick="navigate('settings')">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                System Settings
-            </div>
-            <div class="nav-item" onclick="navigate('help')">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                Developer Center
-            </div>
-        </nav>
+    </div>
+
+    <aside>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+            <h3 style="color: var(--accent); margin:0;">VoltaicMail Pro</h3>
+            <button onclick="handleLogout()" style="padding:4px 10px; font-size:11px; background:#dc2626;">Log Out</button>
+        </div>
+        
+        <div class="nav-item active" onclick="switchView('metrics')">Metrics Page</div>
+        <div class="nav-item" onclick="switchView('domains')">Domain Page</div>
+        
+        <div class="nav-item" onclick="toggleSubNav('audience-sub')">Audience Page 👇</div>
+        <div id="audience-sub" class="sub-nav">
+            <div class="nav-item" onclick="switchView('contacts')">Contacts Subpage</div>
+            <div class="nav-item" onclick="switchView('properties')">Properties Subpage</div>
+            <div class="nav-item" onclick="switchView('topics')">Topics Subpage</div>
+        </div>
+
+        <div class="nav-item" onclick="switchView('templates')">Template Page</div>
+        <div class="nav-item" onclick="switchView('broadcast')">Broadcast Page</div>
+        <div class="nav-item" onclick="switchView('automation')">Automation Page</div>
+        <div class="nav-item" onclick="switchView('logs')">Logs Page</div>
+        <div class="nav-item" onclick="switchView('api')">API Page</div>
+        <div class="nav-item" onclick="switchView('webhook')">Webhook Page</div>
+        
+        <div class="nav-item" onclick="toggleSubNav('settings-sub')">Settings Page 👇</div>
+        <div id="settings-sub" class="sub-nav">
+            <div class="nav-item" onclick="switchView('usage')">Usage Document</div>
+            <div class="nav-item" onclick="switchView('billing')">Billing Document</div>
+            <div class="nav-item" onclick="switchView('team')">Team Document</div>
+            <div class="nav-item" onclick="switchView('smtp')">SMTP Config</div>
+            <div class="nav-item" onclick="switchView('integration')">Integration Doc</div>
+            <div class="nav-item" onclick="switchView('unsubscribe')">Unsubscribe Page</div>
+            <div class="nav-item" onclick="switchView('documents')">Master Documents</div>
+        </div>
+
+        <div class="nav-item" onclick="switchView('help')" style="margin-top:auto; background:#1e293b; color:#fff;">Help Page</div>
     </aside>
 
     <main>
-        <!-- 1. METRICS -->
-        <div id="view-metrics" class="panel" style="display: block;">
-            <h2>Ecosystem Metrics Engine</h2>
-            <div class="form-layout-inline">
-                <div class="field-group">
-                    <label>Temporal Window</label>
-                    <select id="metricTimeframe" onchange="refreshMetricsView()">
-                        <option value="today">Today</option>
-                        <option value="yesterday">Yesterday</option>
-                        <option value="last7days">Last 7 Days</option>
-                        <option value="last15days">Last 15 Days</option>
-                        <option value="last30days">Last 30 Days</option>
-                    </select>
-                </div>
-                <div class="field-group">
-                    <label>Identity Domain Context</label>
-                    <select id="metricDomain" onchange="refreshMetricsView()">
-                        <option value="all">All Linked Registries</option>
-                    </select>
-                </div>
-                <div style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Auto-recalculates interval looping every 15 minutes.</div>
+        <div id="view-metrics" class="panel-content">
+            <h2>Real Details Delivery Metrics Matrix</h2>
+            <div class="card">
+                <select id="metric-timeframe" onchange="syncMetrics()">
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="last7days">Last 7 Days</option>
+                    <option value="last15days">Last 15 Days</option>
+                    <option value="last30days">Last 30 Days</option>
+                </select>
+                <select id="metric-domain" onchange="syncMetrics()"><option value="all">All Domains</option></select>
             </div>
-            <div class="metric-cards-row">
-                <div class="card"><h5>Transmissions</h5><p id="mSent">1,482</p></div>
-                <div class="card"><h5>Deliverability Rate</h5><p id="mDeliv">99.42%</p></div>
-                <div class="card"><h5>Bounce Matrix</h5><p id="mBounce">0.45%</p></div>
-                <div class="card"><h5>Complaint Tracking</h5><p id="mComp">0.13%</p></div>
+            <div class="grid">
+                <div class="card"><h3>Emails Streamed</h3><h1 id="met-emails">0</h1></div>
+                <div class="card"><h3>Deliverability Rate</h3><h1 id="met-deliver">100.00%</h1></div>
+                <div class="card"><h3>Bounce Rate</h3><h1 id="met-bounce">0.00%</h1></div>
+                <div class="card"><h3>Complaint Rate</h3><h1 id="met-complaint">0.00%</h1></div>
             </div>
         </div>
 
-        <!-- 2. AUDIENCE -->
-        <div id="view-audience" class="panel">
-            <h2>Audience Ingestion & Segments Hub</h2>
-            <div class="sub-nav" id="audSub">
-                <span class="active-sub" onclick="subNav('aud', 'contacts')">Contacts Ledger</span>
-                <span onclick="subNav('aud', 'properties')">Custom Data Fields</span>
-                <span onclick="subNav('aud', 'topics')">Subscription Lists</span>
+        <div id="view-domains" class="panel-content" style="display:none;">
+            <h2>Connected Domains Routing System</h2>
+            <div class="card">
+                <input type="text" id="dom-input" placeholder="yourdomain.com" style="width: 300px;">
+                <button onclick="addDomain()">Create Domain</button>
             </div>
+            <div class="card">
+                <h3>Active Verified Matrix (Name Servers: ns1.voltaicmail.xyz / DNS Hooked)</h3>
+                <table>
+                    <thead><tr><th>Domain URL String</th><th>Status</th><th>Connected Time Record</th><th>Action</th></tr></thead>
+                    <tbody id="dom-table"></tbody>
+                </table>
+            </div>
+        </div>
 
-            <div id="panel-aud-contacts">
-                <div class="form-layout-inline">
-                    <div class="field-group"><label>Email Pointer</label><input type="email" id="cEmail" placeholder="user@domain.com"></div>
-                    <div class="field-group"><label>Custom Data Attributes</label><input type="text" id="cProps" placeholder='{"tier":"premium"}'></div>
-                    <button onclick="addContactRow()">Insert Record</button>
+        <div id="view-contacts" class="panel-content" style="display:none;">
+            <h2>Audience Contacts Core Subpage</h2>
+            <div class="card">
+                <input type="email" id="con-email" placeholder="contact@email.com">
+                <input type="text" id="con-segment" placeholder="Segment Label">
+                <button onclick="addContact()">Add Target Contact</button>
+            </div>
+            <div class="card"><table><thead><tr><th>Email Address</th><th>Segment Allocation</th><th>Timestamp Record</th></tr></thead><tbody id="con-table"></tbody></table></div>
+        </div>
+
+        <div id="view-properties" class="panel-content" style="display:none;">
+            <h2>Custom Properties Subpage Data Mapping</h2>
+            <div class="card">
+                <input type="email" id="prop-email" placeholder="Contact Email">
+                <input type="text" id="prop-key" placeholder="Property Key (eg. first_name)">
+                <input type="text" id="prop-val" placeholder="Property Value">
+                <button onclick="addProperty()">Save Personalization Token</button>
+            </div>
+            <div class="card"><table><thead><tr><th>Target Contact Email</th><th>Property Key Field</th><th>Stored Value</th></tr></thead><tbody id="prop-table"></tbody></table></div>
+        </div>
+
+        <div id="view-topics" class="panel-content" style="display:none;">
+            <h2>Audience Delivery Topics Subscription Lists</h2>
+            <div class="card">
+                <input type="text" id="top-name" placeholder="Topic Name (eg. Newsletter)">
+                <input type="text" id="top-desc" placeholder="Public Description Summary">
+                <button onclick="addTopic()">Provision New Topic List</button>
+            </div>
+            <div class="card"><table><thead><tr><th>Topic System Name</th><th>Description Route Info</th></tr></thead><tbody id="top-table"></tbody></table></div>
+        </div>
+
+        <div id="view-templates" class="panel-content" style="display:none;">
+            <h2>Real HTML Marketing Template Generator Engine</h2>
+            <div class="card">
+                <input type="text" id="tmpl-name" placeholder="Template Unique Name" style="width:100%; margin-bottom:10px;"><br>
+                <input type="text" id="tmpl-sub" placeholder="Default Subject Line String" style="width:100%; margin-bottom:10px;"><br>
+                <textarea id="tmpl-html" placeholder="<h1>Raw HTML Campaign Structural Body Lines Here</h1>" style="width:100%; height:150px; background:#1e293b; color:#fff; border-radius:6px; padding:10px;"></textarea><br>
+                <button onclick="saveTemplate()" style="margin-top:10px;">Compile and Save Real Template Profile</button>
+            </div>
+            <div class="card"><table><thead><tr><th>Template Registry Key</th><th>Subject Pattern</th><th>Time Formed</th></tr></thead><tbody id="tmpl-table"></tbody></table></div>
+        </div>
+
+        <div id="view-broadcast" class="panel-content" style="display:none;">
+            <h2>Mass Marketing & Transactional Broadcast Control</h2>
+            <div class="card">
+                <label>Select Verified Sending Domain Routing Core:</label><br>
+                <select id="broad-dom" style="width:100%; margin-top:5px; margin-bottom:15px;"></select><br>
+                <input type="text" id="broad-sub" placeholder="Broadcast Run Subject String Override" style="width:100%; margin-bottom:15px;"><br>
+                <textarea id="broad-html" placeholder="Type personal message or inject personalization tokens dynamically like {{first_name}}" style="width:100%; height:120px;"></textarea><br>
+                <button onclick="dispatchBroadcast()" style="background:#ea580c; width:100%; margin-top:10px;">Execute Real-Time Synchronized Campaign Run Now</button>
+            </div>
+        </div>
+
+        <div id="view-automation" class="panel-content" style="display:none;">
+            <h2>Real System Automation Engine Flows</h2>
+            <div class="card">
+                <input type="text" id="auto-name" placeholder="Flow Schema Name">
+                <select id="auto-trigger"><option value="signup">On Customer Account Signup</option><option value="webhook">On Incoming API Hook Dispatch</option></select>
+                <input type="number" id="auto-delay" placeholder="Pipeline Delay Run (Minutes)" style="width:180px;">
+                <input type="text" id="auto-ckey" placeholder="Condition Variable Key">
+                <input type="text" id="auto-cval" placeholder="Condition Value Pattern Match">
+                <button onclick="addAutomation()" style="margin-top:10px;">Deploy Active Automation Ruleset Map</button>
+            </div>
+            <div class="card"><table><thead><tr><th>Workflow Name Identifier</th><th>Trigger Target Type</th><th>Delay Range</th><th>Conditional Rule Matrix</th></tr></thead><tbody id="auto-table"></tbody></table></div>
+        </div>
+
+        <div id="view-logs" class="panel-content" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2>System Delivery Endpoint Execution Logs</h2>
+                <button onclick="window.open('/api/logs/export')" style="background:#4d7c0f;">Export Historical System Logs (CSV)</button>
+            </div>
+            <div class="card">
+                <div style="margin-bottom:10px;">
+                    <select id="log-filter-status"><option value="all">All Statuses Output</option><option value="sent">sent</option><option value="delivered">delivered</option><option value="bounce">bounce</option><option value="complaint">complaint</option></select>
+                </select>
                 </div>
                 <table>
-                    <thead><tr><th>Contact Pointer</th><th>Attributes Profile Mapping</th><th>Verification Status</th></tr></thead>
-                    <tbody id="contactsTableBody"></tbody>
-                </table>
-            </div>
-
-            <div id="panel-aud-properties" style="display:none;">
-                <div class="doc-box">
-                    <h4>Properties Serialization Key Engine</h4>
-                    <p>Map targeted key-value stores into transactional message nodes. Reference custom fields dynamically inside execution objects using single-brace context formatting parameters.</p>
-                </div>
-                <table id="propsTable">
-                    <thead><tr><th>Metadata Schema Parameter</th><th>Data Type Primitive</th><th>Default Execution Fallback Value</th></tr></thead>
-                    <tbody>
-                        <tr><td>company_name</td><td>String Text</td><td>Valued Workspace Customer</td></tr>
-                        <tr><td>account_id</td><td>Numeric Integer</td><td>000000</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="panel-aud-topics" style="display:none;">
-                <div class="form-layout-inline">
-                    <div class="field-group"><label>Preference Thread Identifier</label><input type="text" id="tName" placeholder="System Security Matrix Updates"></div>
-                    <button onclick="addTopicRow()">Provision Thread Link</button>
-                </div>
-                <table>
-                    <thead><tr><th>Registered List Entity Target</th><th>Active Opt-In Records Count</th></tr></thead>
-                    <tbody id="topicsTableBody"></tbody>
+                    <thead><tr><th>Endpoint URL Called</th><th>Status Output</th><th>Method</th><th>User Agent Profile</th><th>API Token Identity Field</th><th>Time Triggered</th></tr></thead>
+                    <tbody id="logs-table"></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- 3. BROADCAST -->
-        <div id="view-broadcast" class="panel">
-            <h2>Production Broadcast Pipeline</h2>
-            <div class="form-layout-inline">
-                <div class="field-group"><label>Sender Reference (From)</label><input type="text" id="bFrom" placeholder="alerts@voltaicmail.xyz" style="width:280px;"></div>
-                <div class="field-group"><label>Target Ingestion Segment</label><select id="bTarget"><option value="all">Global Contact Directory</option></select></div>
+        <div id="view-api" class="panel-content" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>Developer Token Access Key Profiles</h2>
+                <button onclick="window.open('/api/keys/export')" style="background:#0369a1;">Export Registry Map CSV</button>
             </div>
-            <div class="field-group" style="margin-bottom:15px;">
-                <label>Campaign Subject String</label>
-                <input type="text" id="bSubject" placeholder="Enterprise System Core Critical Update Sequence" style="width:500px;">
+            <div class="card">
+                <input type="text" id="api-name-in" placeholder="Token Name Application Interface">
+                <select id="api-perm-in"><option value="Full Access">Full Access</option><option value="Sending Only">Sending Only</option></select>
+                <button onclick="createTokenKey()">Generate Secret Production Key Token</button>
             </div>
-            <div class="field-group" style="margin-bottom:15px;">
-                <label>Direct Injected HTML Body Elements</label>
-                <textarea id="bHtml" style="width:500px; height:180px;" placeholder="<div style='font-family: sans-serif;'>...</div>"></textarea>
-            </div>
-            <button onclick="queueBroadcastTask()">Execute Automated Run</button>
+            <div class="card"><table><thead><tr><th>Name Identity</th><th>Secret Security Token String</th><th>Permission Parameter Token</th><th>Last System Call Record</th><th>Date Created</th></tr></thead><tbody id="api-table"></tbody></table></div>
         </div>
 
-        <!-- 4. AUTOMATIONS -->
-        <div id="view-automations" class="panel">
-            <h2>Workflow Pipeline Matrix</h2>
-            <div class="form-layout-inline">
-                <div class="field-group"><label>Automation Flow Label</label><input type="text" id="aLabel" placeholder="Verification Escalation Cascade"></div>
-                <div class="field-group">
-                    <label>Event Hook Ingest Action Trigger</label>
-                    <select id="aTrigger">
-                        <option value="signup">Immediate Account Registration Sequence</option>
-                        <option value="bounce">Bounce Handler Deflection Callback</option>
-                    </select>
-                </div>
-                <button onclick="commitWorkflowNode()">Compile Automation Logic</button>
+        <div id="view-webhook" class="panel-content" style="display:none;">
+            <h2>Configure Live Webhook Streaming Updates</h2>
+            <div class="card">
+                <input type="text" id="wh-url" placeholder="https://yourserver.com/webhook-listener" style="width:60%;">
+                <input type="text" id="wh-events" placeholder="email.delivered, email.bounce" style="width:30%;">
+                <button onclick="addWebhook()">Add Webhook Endpoint</button>
             </div>
-            <div class="timeline-container" id="automationTimeline">
-                <div class="timeline-node"><div>🔘</div><div><strong>Initialization Entry State:</strong> Detects incoming system lifecycle events.</div></div>
-                <div class="timeline-node"><div>⏳</div><div><strong>Temporal Hold Step Block:</strong> Delays delivery dispatch thread by exactly 15 minutes.</div></div>
-                <div class="timeline-node"><div>✉️</div><div><strong>Dynamic Engine Iteration:</strong> Evaluates tracking paths across active data blocks.</div></div>
-            </div>
+            <div class="card"><table><thead><tr><th>Webhook Destination URL Endpoint</th><th>List Target Events Monitored</th><th>Registered On</th></tr></thead><tbody id="webhook-table"></tbody></table></div>
         </div>
 
-        <!-- 5. TEMPLATES -->
-        <div id="view-templates" class="panel">
-            <h2>Layout Blueprint Layout Blueprints</h2>
-            <div class="form-layout-inline">
-                <div class="field-group"><label>Layout Label String</label><input type="text" id="tmplLabel" placeholder="System Security Alert"></div>
-                <div class="field-group"><label>Default Fallback Subject Line</label><input type="text" id="tmplSubj" placeholder="[Alert] Action Required" style="width:250px;"></div>
-            </div>
-            <div class="field-group" style="margin-bottom:15px;">
-                <label>Base Layer Mark-up HTML</label>
-                <textarea id="tmplBody" style="width:100%; height:160px;" placeholder="<html>...</html>"></textarea>
-            </div>
-            <button onclick="saveTemplateRecord()">Store Blueprint Matrix</button>
-            <table>
-                <thead><tr><th>Blueprint Reference Identifier Hash</th><th>Layout Label String</th><th>Default Fallback Subject Line</th></tr></thead>
-                <tbody id="templatesTableBody"></tbody>
-            </table>
-        </div>
+        <div id="view-usage" class="panel-content" style="display:none;"><h2>Usage Statistics Document File</h2><div class="card"><p><b>Current Month Allocations Run:</b> 4,219 / 100,000 Total System Delivery Transmissions Processed.</p></div></div>
+        <div id="view-billing" class="panel-content" style="display:none;"><h2>Billing Parameter Specifications</h2><div class="card"><p>Your production account infrastructure parameter profile is currently configured on the <b>Enterprise Layer Routing Program Tier ($0.00 Developer System License Run).</b></p></div></div>
+        <div id="view-team" class="panel-content" style="display:none;"><h2>Team Access Configuration Management</h2><div class="card"><p><b>Owner:</b> system-admin-pipeline@voltaicmail.xyz (Full Workspace Access Rights Overwrite Master Bound).</p></div></div>
+        <div id="view-smtp" class="panel-content" style="display:none;"><h2>System Internal SMTP Relay Overwrite Maps</h2><div class="card"><p><b>Host Address Endpoint Network:</b> 127.0.0.1 Loopback Routing System Port Forward Block 2525 operational execution pipeline.</p></div></div>
+        <div id="view-integration" class="panel-content" style="display:none;"><h2>System API Technical Core Framework Integrations</h2><div class="card"><h3>Visual Studio Code Module Tool Suite Execution:</h3><pre style="background:#1e293b; padding:15px; border-radius:6px;">npm install voltaicmail</pre></div></div>
+        <div id="view-unsubscribe" class="panel-content" style="display:none;"><h2>Global Audience Unsubscribe Page Preview Mapping Layout</h2><div class="card"><p>When users choose to remove email tracking loops over VoltaicMail infrastructure runs, they select from registered preference topics natively.</p></div></div>
+        
+        <div id="view-documents" class="panel-content" style="display:none;">
+            <h2>VoltaicMail Technical System Master Documents Library Layout</h2>
+            <div class="card">
+                <h3>Transactional Campaign SDK Implementation Matrix</h3>
+                <p>Accelerate mass production deployments instantly by pulling our custom system modules right inside standard JavaScript framework blocks easily:</p>
+                <pre style="background:#1e293b; padding:15px; border-radius:6px; color:#a7f3d0;">
+const VoltaicMail = require('voltaicmail');
+const vm = new VoltaicMail('YOUR_SECRET_GENERATED_API_TOKEN_KEY');
 
-        <!-- 6. DOMAINS -->
-        <div id="view-domains" class="panel">
-            <h2>Authorized Routing Domain Nodes</h2>
-            <div class="form-layout-inline">
-                <div class="field-group"><label>Target Root Ingest Host Domain</label><input type="text" id="domString" placeholder="sub.domain.com"></div>
-                <button onclick="registerDomainRow()">Map Infrastructure Link</button>
-            </div>
-            <table>
-                <thead><tr><th>Base URL Host Address</th><th>Validation Metric State</th><th>Assigned Core TXT Record Token</th><th>Connection Timestamp</th><th>Action</th></tr></thead>
-                <tbody id="domainsTableBody"></tbody>
-            </table>
-        </div>
-
-        <!-- 7. DIAGNOSTIC LOGS -->
-        <div id="view-logs" class="panel">
-            <h2>Ecosystem Transaction logs</h2>
-            <div class="form-layout-inline">
-                <div class="field-group">
-                    <label>Filter Framework Target Code Status</label>
-                    <select id="logStatusSelect" onchange="applyLogsFilters()">
-                        <option value="all">All Tracked Verification States</option>
-                        <option value="200">200 - Operation Validated</option>
-                        <option value="400">400 - Parameter Ingestion Exception</option>
-                    </select>
-                </div>
-                <div class="field-group">
-                    <label>Temporal Duration Frame</label>
-                    <select id="logTimeSelect" onchange="applyLogsFilters()">
-                        <option value="all">Entire Historical Record Ledger</option>
-                        <option value="7">Last 7 Days Sequence</option>
-                        <option value="15">Last 15 Days Sequence</option>
-                        <option value="30">Last 30 Days Sequence</option>
-                    </select>
-                </div>
-                <button class="secondary" onclick="exportLogsToCSV()">Export Dataset to CSV</button>
-            </div>
-            <table>
-                <thead><tr><th>Inbound Endpoint Target Path</th><th>HTTP Method</th><th>State Return Code</th><th>Identity Key Token Header</th><th>Timestamp</th></tr></thead>
-                <tbody id="logsTableBody"></tbody>
-            </table>
-        </div>
-
-        <!-- 8. API KEYS -->
-        <div id="view-api" class="panel">
-            <h2>Secure Authorization Tokens Control Center</h2>
-            <div class="form-layout-inline">
-                <div class="field-group"><label>Key Access Token Descriptor Label</label><input type="text" id="keyLabel" placeholder="Core Application Node Instance"></div>
-                <div class="field-group">
-                    <label>Permission Context Authorization Tier</label>
-                    <select id="keyPerms">
-                        <option value="Full Access">Administrative Root Access Scope</option>
-                        <option value="Sending Constraints Only">Pipeline Delivery Thread Restricted Access Scope</option>
-                    </select>
-                </div>
-                <button onclick="generateApiKeyRow()">Mint Access Key Token</button>
-                <button class="secondary" onclick="exportApiKeysToCSV()">Export Token Registry</button>
-            </div>
-            <table>
-                <thead><tr><th>Descriptor Label Tag</th><th>Secure Access Token String</th><th>Access Rights Scope</th><th>Initialization Timestamp</th></tr></thead>
-                <tbody id="apiTableBody"></tbody>
-            </table>
-        </div>
-
-        <!-- 9. WEBHOOKS -->
-        <div id="view-webhooks" class="panel">
-            <h2>Event Subscription Webhooks Streaming Infrastructure</h2>
-            <div class="form-layout-inline">
-                <div class="field-group"><label>Destination Target URL Callback Endpoint</label><input type="text" id="whUrl" placeholder="https://payload.receiver.internal/v1/ingest" style="width:380px;"></div>
-                <button onclick="registerWebhookRow()">Initialize Callback Loop</button>
-            </div>
-            <table>
-                <thead><tr><th>Payload Callback Address</th><th>State Mapping Status</th><th>Event Scope Configuration Parameters</th></tr></thead>
-                <tbody id="webhooksTableBody"></tbody>
-            </table>
-        </div>
-
-        <!-- 10. SYSTEM SETTINGS -->
-        <div id="view-settings" class="panel">
-            <h2>Ecosystem Configuration Parameters Engine</h2>
-            <div class="sub-nav" id="setSub">
-                <span class="active-sub" onclick="subNav('set', 'usage')">Usage Metrics Volume</span>
-                <span onclick="subNav('set', 'billing')">Billing Statements Ledger</span>
-                <span onclick="subNav('set', 'team')">Team Identity Access Controls</span>
-                <span onclick="subNav('set', 'smtp')">SMTP Server Routing Config</span>
-                <span onclick="subNav('set', 'integration')">System Integrations Platform</span>
-                <span onclick="subNav('set', 'unsubscribe')">Unsubscribe Configuration</span>
-                <span onclick="subNav('set', 'documents')">Internal Reference Documents</span>
-            </div>
-
-            <div id="panel-set-usage">
-                <div class="doc-box"><h4>Active Compute Allocation Metrics</h4><p>Data Storage Volume Pool: <strong>1.48 GB / 25.00 GB Allocated Max Boundary</strong></p></div>
-            </div>
-            <div id="panel-set-billing" style="display:none;">
-                <div class="doc-box"><h4>Enterprise Instance Account Level Status</h4><p>Current Invoiced Service Tier Profile Mapping: <span class="badge badge-live">Enterprise Scaled Network Cluster Node</span></p></div>
-            </div>
-            <div id="panel-set-team" style="display:none;">
-                <div class="doc-box"><h4>Workspace Operators Directory Access Control</h4><p>Primary Workspace Controller Operator Account Pointer Identity: <code>root@cluster-node-instance.internal</code></p></div>
-            </div>
-            <div id="panel-set-smtp" style="display:none;">
-                <div class="card" style="max-width:450px;">
-                    <h5>Global Target Notification Admin Email</h5>
-                    <div class="form-layout-inline" style="margin-top:10px;">
-                        <input type="email" id="adminNotifyEmail" placeholder="alerts@voltaicmail.xyz">
-                        <button onclick="updateAdminNotificationPointer()">Update Route</button>
-                    </div>
-                </div>
-            </div>
-            <div id="panel-set-integration" style="display:none;">
-                <div class="doc-box"><h4>External Platform Integration Webhook Mappings</h4><p>Active Third-Party Webhook Endpoints Monitored: <strong>0 Core Platform Connections Configured</strong></p></div>
-            </div>
-            <div id="panel-set-unsubscribe" style="display:none;">
-                <div class="doc-box"><h4>Global Compliance Footers Configuration</h4><p>Mandatory preference processing tags are parsed and validated automatically across all outbound batches.</p></div>
-            </div>
-            <div id="panel-set-documents" style="display:none;">
-                <div class="doc-box">
-                    <h4>Internal Core Workspace Configuration Properties Documentation</h4>
-                    <pre>Proxy Pass Directive: nginx upstream proxy pool [Port 3000 -> 80]
-Database Layer Storage Reference: SQLite Core Binary File Module
-System Supervisor Lifecycle Engine Daemon Process: PM2 System Process Layer</pre>
-                </div>
+vm.send({
+   from: 'delivery@yourverifieddomain.com',
+   to: 'targetcontact@client.com',
+   subject: 'Accelerated Campaign Execution Payload',
+   html: '&lt;h1&gt;System Operational Launch Run Confirmed&lt;/h1&gt;'
+});</pre>
             </div>
         </div>
 
-        <!-- 11. DEVELOPER CENTER / HELP -->
-        <div id="view-help" class="panel">
-            <h2>Ecosystem Software Development Kit & API Architecture Library</h2>
-            <div class="doc-box">
-                <h4>System Extension Ingestion Node Package Tool</h4>
-                <p>Natively integrate marketing execution pipelines directly into your applications using standard initialization terminal lines:</p>
-                <pre>npm install voltaicmail</pre>
-            </div>
-            <div class="doc-box">
-                <h4>Node.js Software Development Kit Native Package Core Execution Module Loop</h4>
-                <pre>const VoltaicMail = require('voltaicmail');
-const client = new VoltaicMail('YOUR_PRODUCTION_API_KEY_STRING_HERE');
-
-client.sendEmail({
-    from: 'dispatch@yourdomain.internal',
-    to: 'customer@targetspace.com',
-    subject: 'High Volume Automated Core Delivery Cluster Pipeline Run',
-    html: '&lt;h1&gt;Ecosystem Transaction Running Via Dedicated AWS Box&lt;/h1&gt;'
-}).then(res => console.log("Delivery object array trace identifier:", res.id));</pre>
+        <div id="view-help" class="panel-content" style="display:none;">
+            <h2>VoltaicMail System Help Desk Core Infrastructure Documentation</h2>
+            <div class="card">
+                <h3>Technical Infrastructure Engine Support Portal</h3>
+                <p>Our routing program maximizes performance limits across high-capacity mass transactional or automated campaign deployments seamlessly.</p>
+                <p><b>AWS EC2 Routing Node Bind Location:</b> 13.48.136.173 Node Process Core.</p>
+                <p>For urgent engineering diagnostics, contact deep core dev assistance via system infrastructure controls.</p>
             </div>
         </div>
     </main>
 
     <script>
-        // --- DATA LAYER (In-Memory Platform Registries to replace empty state logs) ---
-        const platformState = {
-            contacts: [
-                { email: "alpha-node@enterprise.com", props: '{"tier":"enterprise"}', status: "verified" },
-                { email: "beta-service@cloudbox.internal", props: '{"group":"devs"}', status: "verified" }
-            ],
-            topics: [
-                { name: "Platform Infrastructure Status Outages", count: 148 },
-                { name: "Weekly System Analytical Volume Digest Reports", count: 912 }
-            ],
-            templates: [
-                { id: "tmpl_81f2c4", name: "Dark Theme System Critical Emergency Layout", subject: "[CRITICAL] Infrastructure Exception Encountered" }
-            ],
-            domains: [
-                { url: "voltaicmail.xyz", status: "Active Tracking Cluster Node", txt: "vmail-verify=7a18f2d9c4c3e1a0b", added: "2026-03-14 11:21:04" }
-            ],
-            apiKeys: [
-                { label: "Master Infrastructure Management Daemon Token", token: "vmt_live_823f11bc4a92de88f1104e76a", perms: "Administrative Root Access Scope", created: "2026-03-14 11:25:31" }
-            ],
-            webhooks: [
-                { url: "https://api.internal-receiver.net/v1/delivery-hooks", status: "Active Connection", events: "email.delivered, email.bounced" }
-            ],
-            logs: [
-                { endpoint: "/v1/transmissions/send-batch", method: "POST", status: "200", key: "vmt_live_823f11bc...", time: "2026-06-10 03:14:22" },
-                { endpoint: "/v1/auth/provision-token", method: "POST", status: "200", key: "vmt_live_823f11bc...", time: "2026-06-10 03:01:05" },
-                { endpoint: "/v1/recipients/purge-bounces", method: "DELETE", status: "400", key: "vmt_live_823f11bc...", time: "2026-06-08 14:10:55" }
-            ]
-        };
-
-        // --- NAVIGATION FRAMEWORK ---
-        function navigate(viewId) {
-            document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.getElementById(`view-${viewId}`).style.display = 'block';
+        let currentUser = null;
+        function toggleSubNav(id) { document.getElementById(id).classList.toggle('open'); }
+        
+        function switchView(target) {
+            document.querySelectorAll('.panel-content').forEach(p => p.style.display = 'none');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            const view = document.getElementById('view-' + target);
+            if(view) view.style.display = 'block';
             event.currentTarget.classList.add('active');
-        }
-
-        function subNav(prefix, subId) {
-            const container = document.getElementById(`view-${prefix === 'aud' ? 'audience' : 'settings'}`);
-            container.querySelectorAll('.sub-nav span').forEach(s => s.classList.remove('active-sub'));
-            event.currentTarget.classList.add('active-sub');
             
-            container.querySelectorAll('[id^="panel-"]').forEach(p => p.style.display = 'none');
-            document.getElementById(`panel-${prefix}-${subId}`).style.display = 'block';
+            if(target === 'metrics') syncMetrics();
+            if(target === 'domains') syncDomains();
+            if(target === 'contacts') syncContacts();
+            if(target === 'properties') syncProperties();
+            if(target === 'topics') syncTopics();
+            if(target === 'templates') syncTemplates();
+            if(target === 'automation') syncAutomations();
+            if(target === 'logs') syncLogs();
+            if(target === 'api') syncApiKeys();
+            if(target === 'webhook') syncWebhooks();
         }
 
-        // --- DATA RENDER LOOPS ---
-        function drawContacts() {
-            const body = document.getElementById("contactsTableBody");
-            body.innerHTML = platformState.contacts.map(c => `<tr><td><strong>${c.email}</strong></td><td><code>${c.props}</code></td><td><span class="badge badge-live">${c.status}</span></td></tr>`).join('');
-            
-            const selectEl = document.getElementById("bTarget");
-            if (selectEl) {
-                selectEl.innerHTML = '<option value="all">Global Contact Directory</option>' + platformState.contacts.map(c => `<option value="${c.email}">${c.email}</option>`).join('');
-            }
-        }
-        function addContactRow() {
-            const email = document.getElementById("cEmail").value;
-            const props = document.getElementById("cProps").value || "{}";
-            if(!email) return;
-            platformState.contacts.push({ email, props, status: "verified" });
-            document.getElementById("cEmail").value = "";
-            document.getElementById("cProps").value = "";
-            drawContacts();
+        async function handleLogin() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const res = await fetch('/api/auth/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email, password}) });
+            const data = await res.json();
+            if(data.success) { currentUser = data.user; document.getElementById('auth-gate').style.display = 'none'; syncMetrics(); }
+            else { document.getElementById('auth-msg').innerText = data.error; }
         }
 
-        function drawTopics() {
-            document.getElementById("topicsTableBody").innerHTML = platformState.topics.map(t => `<tr><td>${t.name}</td><td><strong>${t.count} Records</strong></td></tr>`).join('');
-        }
-        function addTopicRow() {
-            const name = document.getElementById("tName").value;
-            if(!name) return;
-            platformState.topics.push({ name, count: 0 });
-            document.getElementById("tName").value = "";
-            drawTopics();
+        async function handleSignup() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const res = await fetch('/api/auth/signup', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email, password}) });
+            const data = await res.json();
+            if(data.success) { alert('Account created. Real System Verification Link: ' + data.link); window.open(data.link); }
         }
 
-        function drawTemplates() {
-            document.getElementById("templatesTableBody").innerHTML = platformState.templates.map(t => `<tr><td><code>${t.id}</code></td><td>${t.name}</td><td>${t.subject}</td></tr>`).join('');
-        }
-        function saveTemplateRecord() {
-            const name = document.getElementById("tmplLabel").value;
-            const subject = document.getElementById("tmplSubj").value;
-            if(!name || !subject) return;
-            const id = "tmpl_" + Math.random().toString(16).substring(2, 8);
-            platformState.templates.push({ id, name, subject });
-            document.getElementById("tmplLabel").value = "";
-            document.getElementById("tmplSubj").value = "";
-            document.getElementById("tmplBody").value = "";
-            drawTemplates();
+        function handleLogout() { currentUser = null; document.getElementById('auth-gate').style.display = 'flex'; }
+
+        async function syncMetrics() {
+            const tf = document.getElementById('metric-timeframe').value;
+            const dom = document.getElementById('metric-domain').value;
+            const res = await fetch(`/api/metrics?timeframe=${tf}&domain=${dom}`);
+            const d = await res.json();
+            document.getElementById('met-emails').innerText = d.emails;
+            document.getElementById('met-deliver').innerText = d.deliverability;
+            document.getElementById('met-bounce').innerText = d.bounce;
+            document.getElementById('met-complaint').innerText = d.complaint;
         }
 
-        function drawDomains() {
-            document.getElementById("domainsTableBody").innerHTML = platformState.domains.map((d, index) => `<tr><td><strong>${d.url}</strong></td><td><span class="badge badge-live">${d.status}</span></td><td><code>${d.txt}</code></td><td>${d.added}</td><td><button class="danger" onclick="deleteDomainRow(${index})">Remove Node</button></td></tr>`).join('');
-            
-            const mDomain = document.getElementById("metricDomain");
-            if(mDomain) {
-                mDomain.innerHTML = '<option value="all">All Linked Registries</option>' + platformState.domains.map(d => `<option value="${d.url}">${d.url}</option>`).join('');
-            }
-        }
-        function registerDomainRow() {
-            const url = document.getElementById("domString").value;
-            if(!url) return;
-            const hash = Math.random().toString(16).substring(2, 10) + Math.random().toString(16).substring(2, 9);
-            const stamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
-            platformState.domains.push({ url, status: "Active Tracking Cluster Node", txt: `vmail-verify=${hash}`, added: stamp });
-            document.getElementById("domString").value = "";
-            drawDomains();
-        }
-        function deleteDomainRow(index) {
-            platformState.domains.splice(index, 1);
-            drawDomains();
+        async function syncDomains() {
+            const res = await fetch('/api/domains'); const list = await res.json();
+            const table = document.getElementById('dom-table'); const select = document.getElementById('metric-domain');
+            const broadSel = document.getElementById('broad-dom');
+            table.innerHTML = ''; select.innerHTML = '<option value="all">All Domains</option>'; broadSel.innerHTML = '';
+            list.forEach(d => {
+                table.innerHTML += `<tr><td><b>${d.domain_name}</b></td><td><span style="color:#2563eb;">${d.verification_status}</span></td><td>${d.connected_at}</td><td><button style="background:#dc2626; padding:4px 8px;" onclick="deleteDomain('${d.domain_name}')">Delete</button></td></tr>`;
+                select.innerHTML += `<option value="${d.domain_name}">${d.domain_name}</option>`;
+                broadSel.innerHTML += `<option value="${d.domain_name}">${d.domain_name}</option>`;
+            });
         }
 
-        function drawApiKeys() {
-            document.getElementById("apiTableBody").innerHTML = platformState.apiKeys.map(k => `<tr><td><strong>${k.label}</strong></td><td><code>${k.token}</code></td><td>${k.perms}</td><td>${k.created}</td></tr>`).join('');
-        }
-        function generateApiKeyRow() {
-            const label = document.getElementById("keyLabel").value;
-            const perms = document.getElementById("keyPerms").value;
-            if(!label) return;
-            const token = "vmt_live_" + Math.random().toString(16).substring(2,15) + Math.random().toString(16).substring(2,14);
-            const stamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
-            platformState.apiKeys.push({ label, token, perms, created: stamp });
-            document.getElementById("keyLabel").value = "";
-            drawApiKeys();
+        async function addDomain() {
+            const domainName = document.getElementById('dom-input').value;
+            await fetch('/api/domains/create', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({domainName}) });
+            document.getElementById('dom-input').value = ''; syncDomains();
         }
 
-        function drawWebhooks() {
-            document.getElementById("webhooksTableBody").innerHTML = platformState.webhooks.map(w => `<tr><td><strong>${w.url}</strong></td><td><span class="badge badge-live">${w.status}</span></td><td><code>${w.events}</code></td></tr>`).join('');
-        }
-        function registerWebhookRow() {
-            const url = document.getElementById("whUrl").value;
-            if(!url) return;
-            platformState.webhooks.push({ url, status: "Active Connection", events: "email.delivered, email.bounced" });
-            document.getElementById("whUrl").value = "";
-            drawWebhooks();
+        async function deleteDomain(domainName) {
+            await fetch('/api/domains/delete', { method: 'DELETE', headers: {'Content-Type':'application/json'}, body: JSON.stringify({domainName}) });
+            syncDomains();
         }
 
-        function drawLogs() {
-            document.getElementById("logsTableBody").innerHTML = platformState.logs.map(l => `<tr><td><code>${l.endpoint}</code></td><td><strong>${l.method}</strong></td><td><span class="badge ${l.status==='200'?'badge-live':'badge-hold'}">${l.status}</span></td><td><code>${l.key}</code></td><td>${l.time}</td></tr>`).join('');
+        async function syncContacts() {
+            const res = await fetch('/api/audience/contacts'); const data = await res.json();
+            const t = document.getElementById('con-table'); t.innerHTML = '';
+            data.forEach(c => { t.innerHTML += `<tr><td>${c.email}</td><td>${c.segment}</td><td>${c.created_at}</td></tr>`; });
+        }
+        async function addContact() {
+            await fetch('/api/audience/contacts/add', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email: document.getElementById('con-email').value, segment: document.getElementById('con-segment').value}) });
+            document.getElementById('con-email').value = ''; document.getElementById('con-segment').value = ''; syncContacts();
         }
 
-        // --- FILTER ENGINE ACTIONS ---
-        function applyLogsFilters() {
-            const code = document.getElementById("logStatusSelect").value;
-            const body = document.getElementById("logsTableBody");
-            
-            let filtered = platformState.logs;
-            if(code !== "all") {
-                filtered = filtered.filter(l => l.status === code);
-            }
-            body.innerHTML = filtered.map(l => `<tr><td><code>${l.endpoint}</code></td><td><strong>${l.method}</strong></td><td><span class="badge ${l.status==='200'?'badge-live':'badge-hold'}">${l.status}</span></td><td><code>${l.key}</code></td><td>${l.time}</td></tr>`).join('');
+        async function syncProperties() {
+            const res = await fetch('/api/audience/properties'); const data = await res.json();
+            const t = document.getElementById('prop-table'); t.innerHTML = '';
+            data.forEach(p => { t.innerHTML += `<tr><td>${p.contact_email}</td><td><code>${p.property_key}</code></td><td>${p.property_value}</td></tr>`; });
+        }
+        async function addProperty() {
+            await fetch('/api/audience/properties/add', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email: document.getElementById('prop-email').value, key: document.getElementById('prop-key').value, value: document.getElementById('prop-val').value}) });
+            document.getElementById('prop-email').value = ''; document.getElementById('prop-key').value = ''; document.getElementById('prop-val').value = ''; syncProperties();
         }
 
-        function refreshMetricsView() {
-            const frame = document.getElementById("metricTimeframe").value;
-            const sent = document.getElementById("mSent");
-            const deliv = document.getElementById("mDeliv");
-            
-            if(frame === "today") {
-                sent.innerText = "142"; deliv.innerText = "100.00%";
-            } else if(frame === "yesterday") {
-                sent.innerText = "394"; deliv.innerText = "98.98%";
-            } else {
-                sent.innerText = "1,482"; deliv.innerText = "99.42%";
-            }
+        async function syncTopics() {
+            const res = await fetch('/api/audience/topics'); const data = await res.json();
+            const t = document.getElementById('top-table'); t.innerHTML = '';
+            data.forEach(tp => { t.innerHTML += `<tr><td><b>${tp.name}</b></td><td>${tp.description}</td></tr>`; });
+        }
+        async function addTopic() {
+            await fetch('/api/audience/topics/add', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({name: document.getElementById('top-name').value, description: document.getElementById('top-desc').value}) });
+            document.getElementById('top-name').value = ''; document.getElementById('top-desc').value = ''; syncTopics();
         }
 
-        // --- EXPORT MATRIX ENGINES (Generates and processes native download objects) ---
-        function exportLogsToCSV() {
-            let csv = "Endpoint,Method,Status,ApiKey,Timestamp\n";
-            platformState.logs.forEach(l => { csv += `"${l.endpoint}","${l.method}","${l.status}","${l.key}","${l.time}"\n`; });
-            triggerDataDownload(csv, "system_diagnostic_logs.csv");
+        async function syncTemplates() {
+            const res = await fetch('/api/templates'); const data = await res.json();
+            const t = document.getElementById('tmpl-table'); t.innerHTML = '';
+            data.forEach(tm => { t.innerHTML += `<tr><td><b>${tm.name}</b></td><td>${tm.subject}</td><td>${tm.created_at}</td></tr>`; });
         }
-        function exportApiKeysToCSV() {
-            let csv = "Label,Token,PermissionScope,CreatedTimestamp\n";
-            platformState.apiKeys.forEach(k => { csv += `"${k.label}","${k.token}","${k.perms}","${k.created}"\n`; });
-            triggerDataDownload(csv, "security_api_registry.csv");
-        }
-        function triggerDataDownload(content, filename) {
-            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", filename);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        async function saveTemplate() {
+            await fetch('/api/templates/create', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({name: document.getElementById('tmpl-name').value, subject: document.getElementById('tmpl-sub').value, html_content: document.getElementById('tmpl-html').value}) });
+            document.getElementById('tmpl-name').value = ''; document.getElementById('tmpl-sub').value = ''; document.getElementById('tmpl-html').value = ''; syncTemplates();
         }
 
-        function queueBroadcastTask() {
-            alert("Broadcast task payload accepted and queued into execution delivery channels successfully.");
-            document.getElementById("bSubject").value = "";
-            document.getElementById("bHtml").value = "";
-        }
-        function commitWorkflowNode() {
-            const label = document.getElementById("aLabel").value;
-            if(!label) return;
-            const container = document.getElementById("automationTimeline");
-            const node = document.createElement("div");
-            node.className = "timeline-node";
-            node.innerHTML = `<div>⚡</div><div><strong>${label}:</strong> Compiled background sequence ruleset applied globally.</div>`;
-            container.appendChild(node);
-            document.getElementById("aLabel").value = "";
-        }
-        function updateAdminNotificationPointer() {
-            alert("Target administrative system warning pointer rerouted successfully.");
+        async function dispatchBroadcast() {
+            await fetch('/api/broadcasts/send', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({fromDomain: document.getElementById('broad-dom').value, subject: document.getElementById('broad-sub').value, htmlContent: document.getElementById('broad-html').value}) });
+            document.getElementById('broad-sub').value = ''; document.getElementById('broad-html').value = ''; alert('Real-time synchronized broadcast run completed successfully.');
         }
 
-        // --- EVENT SYNC ENGINE POOL (Long Polling Layer fallback matching real timeline events) ---
-        setInterval(async () => {
-            try {
-                const res = await fetch('/api/realtime/sync');
-                if(res.ok) {
-                    const update = await res.json();
-                    if (update && update.logs) { platformState.logs = update.logs; drawLogs(); }
-                }
-            } catch(e) {}
-        }, 15 * 60 * 1000); // Strict 15-minute structural evaluation loops
+        async function syncAutomations() {
+            const res = await fetch('/api/automations'); const data = await res.json();
+            const t = document.getElementById('auto-table'); t.innerHTML = '';
+            data.forEach(a => { t.innerHTML += `<tr><td>${a.name}</td><td><code>${a.trigger_event}</code></td><td>${a.delay_minutes} min(s)</td><td>IF <code>${a.condition_key}</code> == "${a.condition_value}"</td></tr>`; });
+        }
+        async function addAutomation() {
+            await fetch('/api/automations/create', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({name: document.getElementById('auto-name').value, trigger_event: document.getElementById('auto-trigger').value, delay_minutes: document.getElementById('auto-delay').value, condition_key: document.getElementById('auto-ckey').value, condition_value: document.getElementById('auto-cval').value}) });
+            document.getElementById('auto-name').value = ''; document.getElementById('auto-delay').value = ''; document.getElementById('auto-ckey').value = ''; document.getElementById('auto-cval').value = ''; syncAutomations();
+        }
 
-        // --- INITIALIZATION ---
-        window.onload = () => {
-            drawContacts();
-            drawTopics();
-            drawTemplates();
-            drawDomains();
-            drawApiKeys();
-            drawWebhooks();
-            drawLogs();
-        };
+        async function syncLogs() {
+            const res = await fetch('/api/logs'); const data = await res.json();
+            const t = document.getElementById('logs-table'); t.innerHTML = '';
+            data.forEach(l => { t.innerHTML += `<tr><td><code>${l.endpoint}</code></td><td><b>${l.status}</b></td><td>${l.method}</td><td>${l.user_agent}</td><td>${l.api_key_used}</td><td>${l.created}</td></tr>`; });
+        }
+
+        async function syncApiKeys() {
+            const res = await fetch('/api/keys'); const data = await res.json();
+            const t = document.getElementById('api-table'); t.innerHTML = '';
+            data.forEach(k => { t.innerHTML += `<tr><td>${k.name}</td><td><code>${k.token}</code></td><td>${k.permission}</td><td>${k.last_used}</td><td>${k.created}</td></tr>`; });
+        }
+        async function createTokenKey() {
+            await fetch('/api/keys/create', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({name: document.getElementById('api-name-in').value, permission: document.getElementById('api-perm-in').value}) });
+            document.getElementById('api-name-in').value = ''; syncApiKeys();
+        }
+
+        async function syncWebhooks() {
+            const res = await fetch('/api/webhooks'); const data = await res.json();
+            const t = document.getElementById('webhook-table'); t.innerHTML = '';
+            data.forEach(w => { t.innerHTML += `<tr><td><code>${w.url}</code></td><td>${w.events}</td><td>${w.created_at}</td></tr>`; });
+        }
+        async function addWebhook() {
+            await fetch('/api/webhooks/add', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({url: document.getElementById('wh-url').value, events: document.getElementById('wh-events').value}) });
+            document.getElementById('wh-url').value = ''; document.getElementById('wh-events').value = ''; syncWebhooks();
+        }
+
+        // Automatic Global Data Sync Interval Loop (Every 15 Minutes)
+        setInterval(() => { if(currentUser) syncMetrics(); }, 15 * 60 * 1000);
     </script>
 </body>
 </html>
