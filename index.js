@@ -97,25 +97,58 @@ let db;
 })();
 
 // ==========================================
-// 1. AUTHENTICATION & DIRECT DOCUMENT CONTROL
+// 1. AUTHENTICATION & DIRECT DOCUMENT CONTROL (REVISED)
 // ==========================================
 app.post('/api/auth/signup', async (req, res) => {
     const { email, password } = req.body;
+    
+    // Check for empty inputs
+    if (!email || !password) {
+        return res.status(400).json({ error: "Email and password cannot be empty fields." });
+    }
+
     const token = crypto.randomBytes(32).toString('hex');
     try {
+        // Safe check to ensure table structure exists on the fly
+        await db.exec(`CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE,
+            password TEXT,
+            is_verified INTEGER DEFAULT 0,
+            verification_token TEXT,
+            admin_notify_email TEXT DEFAULT ''
+        );`);
+
         await db.run(`INSERT INTO users (email, password, verification_token) VALUES (?, ?, ?)`, [email, password, token]);
         res.json({ success: true, message: "Verification link generated.", link: `/api/auth/verify?token=${token}` });
     } catch (err) {
-        res.status(400).json({ error: "User already exists." });
+        console.error("Signup DB Error: ", err.message);
+        res.status(400).json({ error: "User already exists or database structure conflict." });
     }
 });
 
 app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
-    const user = await db.get(`SELECT * FROM users WHERE email = ? AND password = ?`, [email, password]);
-    if (!user) return res.status(400).json({ error: "Invalid credentials." });
-    if (!user.is_verified) return res.status(403).json({ error: "Please verify your email address to access your documents." });
-    res.json({ success: true, user: { email: user.email, admin_notify_email: user.admin_notify_email } });
+
+    if (!email || !password) {
+        return res.status(400).json({ error: "Please enter your email and password values." });
+    }
+
+    try {
+        const user = await db.get(`SELECT * FROM users WHERE email = ? AND password = ?`, [email, password]);
+        
+        if (!user) {
+            return res.status(400).json({ error: "Invalid credentials configuration matched." });
+        }
+        if (!user.is_verified) {
+            return res.status(403).json({ error: "Please verify your email address to access your documents." });
+        }
+        
+        res.json({ success: true, user: { email: user.email, admin_notify_email: user.admin_notify_email || '' } });
+    } catch (err) {
+        console.error("Login DB Error: ", err.message);
+        res.status(500).json({ error: "Internal Database processing failure: " + err.message });
+    }
 });
 
 app.get('/api/auth/verify', async (req, res) => {
