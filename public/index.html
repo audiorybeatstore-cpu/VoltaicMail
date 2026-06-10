@@ -3,479 +3,434 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoltaicMail — Control Panel</title>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        // TODO: Replace with your personal Firebase Config object keys gathered in Step 2
-        const firebaseConfig = {
-            apiKey: "AIzaSyDeXtcz_9-6wKkkJ8nCvfYqQZaXT-U0Kug",
-            authDomain: "voltaicmail.firebaseapp.com",
-            projectId: "voltaicmail",
-            storageBucket: "voltaicmail.firebasestorage.app",
-            messagingSenderId: "38028187708",
-            appId: "1:38028187708:web:0c3392daea863e1d3d0b39",
-            measurementId: "G-E1Z1BMNKL2"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        // Security Authentication Router Watchdog
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = '/login.html';
-            } else {
-                document.getElementById('user-display-email').innerText = user.email;
-                loadDashboardData();
-            }
-        });
-
-        window.logoutSession = function() {
-            signOut(auth).then(() => { window.location.href = '/login.html'; });
-        }
-    </script>
-
+    <title>VoltaicMail - Production Delivery Infrastructure</title>
     <style>
-        :root {
-            --bg-main: #000000;
-            --bg-sidebar: #050505;
-            --border-color: #111111;
-            --text-primary: #ffffff;
-            --text-secondary: #888888;
-            --accent-green: #00ff66;
-            --interactive-hover: #161616;
-            --transition-speed: 0.2s;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-primary);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* Sidebar Layout Frame */
-        .sidebar {
-            width: 240px;
-            background-color: var(--bg-sidebar);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 24px 16px;
-        }
-        .brand-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 600;
-            font-size: 15px;
-            color: var(--text-primary);
-            padding: 0 8px 24px 8px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .brand-icon-box {
-            width: 24px;
-            height: 24px;
-            border: 1px solid var(--text-primary);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .brand-icon-box i { width: 14px; height: 14px; color: var(--text-primary); }
-
-        .nav-container { display: flex; flex-direction: column; gap: 24px; margin-top: 24px; flex: 1; }
-        .nav-section { display: flex; flex-direction: column; gap: 4px; }
-        .nav-section-title { font-size: 11px; text-transform: uppercase; color: #444444; font-weight: 700; letter-spacing: 1px; padding: 0 8px 6px 8px; }
-        
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 12px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: color var(--transition-speed), background-color var(--transition-speed), transform var(--transition-speed);
-        }
-        .nav-item i { width: 16px; height: 16px; transition: transform var(--transition-speed); }
-        .nav-item:hover { color: var(--text-primary); background-color: var(--interactive-hover); transform: translateX(2px); }
-        .nav-item:hover i { transform: scale(1.05); }
-        .nav-item.active { color: var(--text-primary); background-color: var(--interactive-hover); }
-
-        /* Workspace Panels Frame */
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .top-bar {
-            height: 64px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding: 0 40px;
-            gap: 24px;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-        .profile-trigger { display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-primary); }
-        .profile-trigger:hover { color: var(--text-secondary); }
-
-        .view-panel { padding: 40px; overflow-y: auto; flex: 1; display: none; }
-        .view-panel.active { display: block; animation: fadeIn var(--transition-speed) ease-in-out; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .view-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
-        h2 { font-size: 22px; font-weight: 500; letter-spacing: -0.4px; }
-        p.subtitle { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
-
-        /* Premium Buttons Layout */
-        .btn-primary { background-color: #ffffff; color: #000000; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: opacity var(--transition-speed); }
-        .btn-primary:hover { opacity: 0.9; }
-        .btn-secondary { background: transparent; border: 1px solid var(--border-color); color: #fff; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; }
-        .btn-secondary:hover { background-color: var(--interactive-hover); }
-
-        /* Data Tables */
-        .table-container { border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background-color: #020202; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
-        th { background-color: #070707; color: #555555; font-weight: 500; padding: 14px 16px; border-bottom: 1px solid var(--border-color); }
-        td { padding: 14px 16px; border-bottom: 1px solid var(--border-color); color: #e5e5e5; }
-        tr:last-child td { border-bottom: none; }
-
-        /* Metric Grid Blocks */
-        .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
-        .metric-card { border: 1px solid var(--border-color); background-color: #020202; padding: 24px; border-radius: 8px; }
-        .metric-label { font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.5px; }
-        .metric-value { font-size: 24px; font-weight: 500; margin-top: 8px; }
-
-        /* Forms & Inputs */
-        label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
-        input, select, textarea { width: 100%; padding: 10px; background: #000; border: 1px solid var(--border-color); border-radius: 6px; color: #fff; margin-bottom: 20px; font-size: 13px; font-family: inherit; }
-        input:focus, select:focus, textarea:focus { border-color: #444; outline: none; }
-
-        /* Modal Overlay Configuration */
-        .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 100; display: none; }
-        .modal-card { background: #0a0a0a; border: 1px solid var(--border-color); width: 100%; max-width: 480px; border-radius: 12px; padding: 32px; }
-        .modal-title { font-size: 16px; font-weight: 500; margin-bottom: 24px; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
+        body { background: #060913; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; margin: 0; display: flex; overflow: hidden; }
+        aside { width: 280px; background: #0b1120; height: 100vh; padding: 30px 20px; border-right: 1px solid #1e293b; box-sizing: border-box; display: flex; flex-direction: column; }
+        .brand-container { font-size: 20px; font-weight: 800; color: #3b82f6; margin-bottom: 35px; display: flex; align-items: center; gap: 12px; }
+        .brand-container svg { width: 24px; height: 24px; fill: currentColor; }
+        .nav-links-wrapper { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        .nav-link { padding: 12px 16px; cursor: pointer; border-radius: 8px; font-weight: 600; color: #94a3b8; display: flex; align-items: center; gap: 12px; transition: all 0.15s; }
+        .nav-link svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
+        .nav-link:hover, .nav-link.active { background: #1d4ed8; color: #ffffff; }
+        main { flex: 1; padding: 40px; overflow-y: auto; height: 100vh; box-sizing: border-box; }
+        .view-panel { display: none; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin: 25px 0; }
+        .metric-card { background: #0f172a; padding: 24px; border-radius: 12px; border: 1px solid #1e293b; }
+        .metric-card h5 { margin: 0 0 8px 0; color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .metric-card p { margin: 0; font-size: 28px; font-weight: 800; color: #ffffff; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #0b1120; border-radius: 10px; overflow: hidden; border: 1px solid #1e293b; }
+        th, td { padding: 16px; text-align: left; border-bottom: 1px solid #1e293b; font-size: 14px; }
+        th { background: #0f172a; color: #94a3b8; font-weight: 600; }
+        input, select, button, textarea { background: #0f172a; color: #ffffff; border: 1px solid #334155; padding: 12px 16px; border-radius: 8px; font-size: 14px; outline: none; box-sizing: border-box; }
+        button { background: #2563eb; border: none; cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; transition: background 0.15s; }
+        button:hover { background: #1d4ed8; }
+        button svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+        .sub-nav-bar { display: flex; gap: 8px; border-bottom: 1px solid #1e293b; padding-bottom: 14px; margin-bottom: 25px; }
+        .sub-nav-bar span { cursor: pointer; color: #64748b; font-weight: 600; padding: 8px 16px; border-radius: 6px; font-size: 14px; transition: all 0.15s; }
+        .sub-nav-bar span.active-sub { color: #3b82f6; background: #1e293b; }
+        .workflow-timeline { border-left: 2px dashed #334155; margin: 20px 0 20px 10px; padding-left: 25px; }
+        .workflow-step { background: #0f172a; border: 1px solid #1e293b; padding: 18px; margin-bottom: 15px; border-radius: 10px; display: flex; align-items: center; gap: 15px; position: relative; }
+        .workflow-step::before { content: ''; width: 12px; height: 12px; background: #334155; border-radius: 50%; position: absolute; left: -32px; top: 23px; }
+        pre { background: #0f172a; padding: 20px; border-radius: 10px; border: 1px solid #1e293b; color: #38bdf8; overflow-x: auto; font-family: 'Courier New', monospace; font-size: 14px; }
+        .document-wrapper { margin-bottom: 25px; background: #0b1120; padding: 25px; border-radius: 12px; border: 1px solid #1e293b; }
+        .form-row { display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; }
+        .form-field { display: flex; flex-direction: column; gap: 8px; }
+        .form-field label { font-size: 13px; color: #94a3b8; font-weight: 500; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .badge-success { background: #10b98122; color: #10b981; border: 1px solid #10b98144; }
+        .badge-pending { background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b44; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div>
-            <div class="brand-container">
-                <div class="brand-icon-box"><i data-lucide="zap"></i></div>
-                <span>VoltaicMail</span>
+    <aside>
+        <div class="brand-container">
+            <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            <span>VoltaicMail Suite</span>
+        </div>
+        <nav class="nav-links-wrapper">
+            <div class="nav-link active" onclick="switchView('metrics')">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                <span>Analytics Engine</span>
             </div>
-            <div class="nav-container">
-                <div class="nav-section">
-                    <div class="nav-section-title">Communications</div>
-                    <div class="nav-item active" id="nav-emails" onclick="switchTab('emails')"><i data-lucide="mail"></i>Emails</div>
-                    <div class="nav-item" id="nav-broadcasts" onclick="switchTab('broadcasts')"><i data-lucide="send"></i>Broadcasts</div>
-                    <div class="nav-item" id="nav-automations" onclick="switchTab('automations')"><i data-lucide="git-branch"></i>Automations</div>
-                    <div class="nav-item" id="nav-templates" onclick="switchTab('templates')"><i data-lucide="layout"></i>Templates</div>
+            <div class="nav-link" onclick="switchView('audience')">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <span>Audience Segments</span>
+            </div>
+            <div class="nav-link" onclick="switchView('broadcast')">
+                <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                <span>Broadcast Engine</span>
+            </div>
+            <div class="nav-link" onclick="switchView('automations')">
+                <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                <span>Automation Flow</span>
+            </div>
+            <div class="nav-link" onclick="switchView('templates')">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <span>Layout Blueprints</span>
+            </div>
+            <div class="nav-link" onclick="switchView('domains')">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                <span>DNS Identification</span>
+            </div>
+            <div class="nav-link" onclick="switchView('logs')">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                <span>Event System Logs</span>
+            </div>
+            <div class="nav-link" onclick="switchView('api')">
+                <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <span>API Keys Control</span>
+            </div>
+            <div class="nav-link" onclick="switchView('webhooks')">
+                <svg viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+                <span>Webhook Dispatches</span>
+            </div>
+            <div class="nav-link" onclick="switchView('settings')">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span>System Settings</span>
+            </div>
+            <div class="nav-link" onclick="switchView('help')">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                <span>Documentation Hub</span>
+            </div>
+        </nav>
+    </aside>
+
+    <main>
+        <div id="metrics" class="view-panel" style="display: block;">
+            <h2>Delivery Diagnostics Engine</h2>
+            <div class="form-row">
+                <div class="form-field">
+                    <label>Calculated Temporal Frame</label>
+                    <select id="metricsTimeframe" onchange="fetchEcosystemMetrics()">
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="last7days">Last 7 Days</option>
+                        <option value="last15days">Last 15 Days</option>
+                        <option value="last30days">Last 30 Days</option>
+                    </select>
                 </div>
-                <div class="nav-section">
-                    <div class="nav-section-title">Core Systems</div>
-                    <div class="nav-item" id="nav-audience" onclick="switchTab('audience')"><i data-lucide="users"></i>Audience</div>
-                    <div class="nav-item" id="nav-metrics" onclick="switchTab('metrics')"><i data-lucide="bar-chart-3"></i>Metrics</div>
-                    <div class="nav-item" id="nav-domains" onclick="switchTab('domains')"><i data-lucide="globe"></i>Domains</div>
-                    <div class="nav-item" id="nav-logs" onclick="switchTab('logs')"><i data-lucide="terminal"></i>Logs</div>
-                    <div class="nav-item" id="nav-api-keys" onclick="switchTab('api-keys')"><i data-lucide="key"></i>API keys</div>
-                    <div class="nav-item" id="nav-webhooks" onclick="switchTab('webhooks')"><i data-lucide="webhook"></i>Webhooks</div>
-                    <div class="nav-item" id="nav-settings" onclick="switchTab('settings')"><i data-lucide="sliders"></i>Settings</div>
+                <div class="form-field">
+                    <label>Identity Filter</label>
+                    <select id="metricsDomain" onchange="fetchEcosystemMetrics()">
+                        <option value="all">All Ecosystem Registries</option>
+                    </select>
                 </div>
             </div>
-        </div>
-        <div class="nav-item" onclick="logoutSession()"><i data-lucide="log-out"></i>Log out</div>
-    </div>
-
-    <div class="main-content">
-        <div class="top-bar">
-            <div class="profile-trigger"><i data-lucide="user"></i><span id="user-display-email">loading...</span></div>
-        </div>
-
-        <div id="emails" class="view-panel active">
-            <div class="view-header-row">
-                <div><h2>Emails</h2><p class="subtitle">Complete log history of system dispatches.</p></div>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>Recipient Address</th><th>Subject Line</th><th>Delivery Status</th><th>Dispatched At</th></tr></thead>
-                    <tbody id="emails-table-body"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="broadcasts" class="view-panel">
-            <div class="view-header-row">
-                <div><h2>Broadcasts</h2><p class="subtitle">Mass promotional deployments and community newsletters.</p></div>
-                <button class="btn-primary" onclick="alert('Module locked: Ready for production data structures.')"><i data-lucide="plus"></i>Create Broadcast</button>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>Campaign Identity Name</th><th>Subject Line</th><th>Status</th><th>Target Volume Count</th></tr></thead>
-                    <tbody id="broadcasts-table-body"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="automations" class="view-panel">
-            <div class="view-header-row">
-                <div><h2>Automations</h2><p class="subtitle">Lifecycle engines: account activations, welcome emails, and password resets.</p></div>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>Trigger Source Hook</th><th>Flow Target Purpose</th><th>Condition Rule</th><th>Status</th></tr></thead>
-                    <tbody>
-                        <tr><td>user.register</td><td>Account Activation System Verification Link</td><td>Immediate</td><td>Active</td></tr>
-                        <tr><td>auth.password_reset</td><td>Secure Recovery Key Reset Vector</td><td>On-demand</td><td>Active</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="templates" class="view-panel">
-            <div class="view-header-row">
-                <div><h2>Templates</h2><p class="subtitle">Clean global transactional template designs.</p></div>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>Template Identity Identifier</th><th>Description Purpose</th><th>Type Style Layout</th></tr></thead>
-                    <tbody>
-                        <tr><td>transactional-default</td><td>Standard Clean Notification Template Layout</td><td>HTML Classic Core</td></tr>
-                    </tbody>
-                </table>
+            <div class="metrics-grid">
+                <div class="metric-card"><h5>Transmissions</h5><p id="statSent">0</p></div>
+                <div class="metric-card"><h5>Deliverability Rate</h5><p id="statDeliv">100.00%</p></div>
+                <div class="metric-card"><h5>Bounce Matrix</h5><p id="statBounce">0.00%</p></div>
+                <div class="metric-card"><h5>Complaints Data</h5><p id="statComp">0.00%</p></div>
             </div>
         </div>
 
         <div id="audience" class="view-panel">
-            <div class="view-header-row">
-                <div><h2>Audience Directory</h2><p class="subtitle">Track registrations, profiles, and opt-in user accounts.</p></div>
+            <h2>Audience Infrastructure Control</h2>
+            <div class="sub-nav-bar" id="audienceSubNav">
+                <span class="active-sub" onclick="switchSubSection('audience', 'contacts')">Contacts</span>
+                <span onclick="switchSubSection('audience', 'properties')">Custom Metadata Properties</span>
+                <span onclick="switchSubSection('audience', 'topics')">Unsubscribe Preference Topics</span>
             </div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>User Contact Email</th><th>First Name</th><th>Opt-in Subscription Status</th><th>Created On</th></tr></thead>
-                    <tbody id="audience-table-body"></tbody>
-                </table>
+
+            <div id="audience-contacts" class="sub-panel">
+                <div class="form-row">
+                    <div class="form-field"><label>Email Address</label><input type="email" id="audEmail" placeholder="recipient@domain.com"></div>
+                    <div class="form-field"><label>Metadata Tag</label><input type="text" id="audMeta" placeholder="key:value"></div>
+                    <button onclick="commitRecipientProfile()">
+                        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Import Profile
+                    </button>
+                </div>
+                <table><thead><tr><th>Recipient Token Handle</th><th>State Status</th><th>Ingestion Sequence Time</th></tr></thead><tbody id="contactTableBody"></tbody></table>
+            </div>
+
+            <div id="audience-properties" class="sub-panel" style="display:none;">
+                <div class="document-wrapper">
+                    <h4>Custom Metadata Properties Definition</h4>
+                    <p>Map structural personalization placeholders onto database contacts. Use syntax parameters inside the broadcast body context to inject data values into execution batches.</p>
+                </div>
+            </div>
+
+            <div id="audience-topics" class="sub-panel" style="display:none;">
+                <div class="form-row">
+                    <div class="form-field"><label>Topic Identity Title</label><input type="text" id="topName" placeholder="Newsletter"></div>
+                    <div class="form-field"><label>Description Statement</label><input type="text" id="topDesc" placeholder="Weekly updates"></div>
+                    <button onclick="commitTopic()">Register Topic</button>
+                </div>
             </div>
         </div>
 
-        <div id="metrics" class="view-panel">
-            <div class="view-header-row"><div><h2>System Analytics</h2><p class="subtitle">Real-time outbox tracking matrices.</p></div></div>
-            <div class="metrics-grid">
-                <div class="metric-card"><div class="metric-label">Total Outbound Volume</div><div class="metric-value" id="m-total">0</div></div>
-                <div class="metric-card"><div class="metric-label">Deliverability Success Rate</div><div class="metric-value" id="m-rate">100%</div></div>
-                <div class="metric-card"><div class="metric-label">Registered Audience Accounts</div><div class="metric-value" id="m-audience">0</div></div>
-                <div class="metric-card"><div class="metric-label">Authorized Active API Vectors</div><div class="metric-value" id="m-keys">0</div></div>
+        <div id="broadcast" class="view-panel">
+            <h2>Live Broadcast Marketing Dispatcher</h2>
+            <div class="form-row">
+                <div class="form-field"><label>Sender Identity (From)</label><input type="text" id="broadFrom" placeholder="newsletter@voltaicmail.xyz" style="width: 250px;"></div>
+                <div class="form-field"><label>Target Segment (To)</label><select id="broadTo"><option value="all">All Verified Ingested Contacts</option></select></div>
             </div>
+            <div class="form-row">
+                <div class="form-field"><label>Subject Line String</label><input type="text" id="broadSubject" placeholder="Campaign Headline" style="width: 515px;"></div>
+            </div>
+            <div class="form-field" style="margin-bottom: 20px;">
+                <label>Direct HTML Payload Markup Body</label>
+                <textarea id="broadHtml" style="width: 515px; height: 150px;" placeholder="<h1>Live Marketing Content</h1>"></textarea>
+            </div>
+            <button onclick="fireLiveBroadcast()">
+                <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                Execute Production Broadcast
+            </button>
+        </div>
+
+        <div id="automations" class="view-panel">
+            <h2>Workflow Delay Execution Matrix</h2>
+            <div class="form-row">
+                <div class="form-field"><label>Sequence Identity Name</label><input type="text" id="autoName" placeholder="Welcome Series"></div>
+                <div class="form-field">
+                    <label>Pipeline Core Trigger Event</label>
+                    <select id="autoTrigger">
+                        <option value="contact_signup">On User Registration Hook</option>
+                        <option value="topic_joined">On Subscription Topic List Insertion</option>
+                    </select>
+                </div>
+                <button onclick="commitAutomationFlow()">Lock Automation Matrix</button>
+            </div>
+            <div class="workflow-timeline">
+                <div class="workflow-step"><div>🟢</div><div><strong>Entry Step Initialization Node:</strong> Capture webhook parsing entry parameters.</div></div>
+                <div class="workflow-step"><div>⏳</div><div><strong>Condition Flow Constraint:</strong> Enforce an explicit execution hold of 15 Minutes.</div></div>
+                <div class="workflow-step"><div>✉️</div><div><strong>Dynamic Delivery Terminal:</strong> Process background execution loops across target entities.</div></div>
+            </div>
+        </div>
+
+        <div id="templates" class="view-panel">
+            <h2>Structural Content Layout Blueprints</h2>
+            <div class="form-row">
+                <div class="form-field"><label>Blueprint Identity Title</label><input type="text" id="tmplName" placeholder="Dark Mode Layout"></div>
+                <div class="form-field"><label>Default Structural Subject Line</label><input type="text" id="tmplSubject" placeholder="Alert Notification Hub" style="width: 300px;"></div>
+            </div>
+            <div class="form-field" style="margin-bottom: 20px;">
+                <label>Structural Blueprint Source Markup HTML</label>
+                <textarea id="tmplHtml" style="width: 100%; height: 200px;" placeholder="<div style='background:#111;'>...</div>"></textarea>
+            </div>
+            <button onclick="commitTemplateDesign()">Store Blueprint Artifact</button>
+            <table><thead><tr><th>Blueprint Reference ID</th><th>Identity Label</th><th>Default Subject Metadata</th></tr></thead><tbody id="templateTableBody"></tbody></table>
         </div>
 
         <div id="domains" class="view-panel">
-            <div class="view-header-row"><div><h2>Verified Domains</h2><p class="subtitle">Authenticated identity sending parameters.</p></div></div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>Domain URL Identification</th><th>DKIM Signature</th><th>SPF Validation</th><th>Status</th></tr></thead>
-                    <tbody>
-                        <tr><td>voltaicmail.xyz</td><td>Configured / Match Verified</td><td>Configured / Match Verified</td><td>Live Production Active</td></tr>
-                    </tbody>
-                </table>
+            <h2>Natively Connected Identity Domains</h2>
+            <div class="form-row">
+                <div class="form-field"><label>Domain Root URL String</label><input type="text" id="domInput" placeholder="yourcompany.com"></div>
+                <button onclick="commitDomainTracking()">Initialize Connection Map</button>
             </div>
+            <table><thead><tr><th>Domain Handle String</th><th>Verification State</th><th>Required TXT Target Value</th><th>Connection Timestamp</th></tr></thead><tbody id="domainTableBody"></tbody></table>
         </div>
 
         <div id="logs" class="view-panel">
-            <div class="view-header-row"><div><h2>System Execution Logs</h2><p class="subtitle">API request network trace matrix.</p></div></div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>API Endpoint Routing Route</th><th>HTTP Method</th><th>Return HTTP Status</th><th>Execution Time</th></tr></thead>
-                    <tbody id="logs-table-body"></tbody>
-                </table>
+            <h2>Ecosystem Transaction System Event Logs</h2>
+            <div class="form-row">
+                <div class="form-field">
+                    <label>Delivery Status Flag</label>
+                    <select id="logStatusFilter">
+                        <option value="all">All Tracked States</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="bounced">Bounced</option>
+                        <option value="complaint">Complaint</option>
+                    </select>
+                </div>
+                <div class="form-field"><label>User Agent Context Search</label><input type="text" id="logUaFilter" placeholder="axios"></div>
+                <button onclick="executeLogSearchQuery()">Filter Logs Matrix</button>
+                <button onclick="window.location.href='/api/logs/export'" style="background: #0f172a; border: 1px solid #334155;">
+                    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Export CSV Document
+                </button>
             </div>
+            <table><thead><tr><th>Target Path Endpoint</th><th>Method</th><th>Execution Status</th><th>User Agent Context Identity</th><th>API Key Trace Token</th></tr></thead><tbody id="logTableBody"></tbody></table>
         </div>
 
-        <div id="api-keys" class="view-panel">
-            <div class="view-header-row">
-                <div><h2>API keys</h2><p class="subtitle">Security auth keys used to execute programmatic notification transactions.</p></div>
-                <button class="btn-primary" onclick="openModal()"><i data-lucide="plus"></i>Create API key</button>
+        <div id="api" class="view-panel">
+            <h2>Secure API Access Keys Authorization Panel</h2>
+            <div class="form-row">
+                <div class="form-field"><label>Descriptive Identity Label</label><input type="text" id="keyName" placeholder="Production Workspace Backend"></div>
+                <div class="form-field">
+                    <label>Authorization Access Constraints</label>
+                    <select id="keyPerm">
+                        <option value="full_access">Full Administrative Access</option>
+                        <option value="sending_only">Sending Pipeline Execution Constraints Only</option>
+                    </select>
+                </div>
+                <button onclick="commitApiKey()">Mint Authorization Token</button>
             </div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>Name Identity Tag</th><th>Secret Token Prefix Reference</th><th>Scope Permission Limit</th><th>Last Action Interaction</th><th style="width: 50px;"></th></tr></thead>
-                    <tbody id="keys-table-body"></tbody>
-                </table>
-            </div>
+            <table><thead><tr><th>Label Tag</th><th>Secure Access Key Authorization Token</th><th>Permission Boundaries</th><th>Creation Point</th></tr></thead><tbody id="apiKeyTableBody"></tbody></table>
         </div>
 
         <div id="webhooks" class="view-panel">
-            <div class="view-header-row">
-                <div><h2>Webhooks Integration</h2><p class="subtitle">Stream live email events back to your primary user applications.</p></div>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>Target Endpoint URL Payload Dest</th><th>Subscribed Event Trigger</th><th>Status</th></tr></thead>
-                    <tbody id="webhooks-table-body"></tbody>
-                </table>
+            <h2>Event Subscription Webhooks Routing Config</h2>
+            <div class="form-row">
+                <div class="form-field"><label>Target URL Endpoint Payload Destination</label><input type="text" id="whTarget" placeholder="https://api.receiver.com/v1/webhook" style="width: 400px;"></div>
+                <button onclick="commitWebhookUrl()">Add Webhook Destination</button>
             </div>
         </div>
 
         <div id="settings" class="view-panel">
-            <div class="view-header-row"><div><h2>System Settings</h2><p class="subtitle">Manage server configuration configurations.</p></div></div>
-            <div class="table-container" style="padding: 32px; max-width: 600px;">
-                <label>Default Outbound System From Signature Name</label>
-                <input type="text" value="VoltaicMail API System Master" readonly>
-                <label>Primary Fallback Verification Handling Mode</label>
-                <input type="text" value="Strict SPF/DKIM Requirement Enforced" readonly>
+            <h2>Ecosystem Configuration Parameters</h2>
+            <div class="sub-nav-bar" id="settingsSubNav">
+                <span class="active-sub" onclick="switchSubSection('settings', 'usage')">Usage Volumes</span>
+                <span onclick="switchSubSection('settings', 'billing')">Billing Invoices</span>
+                <span onclick="switchSubSection('settings', 'team')">Team Access Control</span>
+                <span onclick="switchSubSection('settings', 'smtp')">Brevo SMTP Settings</span>
+                <span onclick="switchSubSection('settings', 'unsubscribe')">Unsubscribe Configuration</span>
+                <span onclick="switchSubSection('settings', 'documents')">Internal Reference Documents</span>
             </div>
-        </div>
-    </div>
 
-    <div class="modal-overlay" id="keyModal">
-        <div class="modal-card">
-            <div class="modal-title">Create API key</div>
-            <label>Name</label>
-            <input type="text" id="modalKeyName" placeholder="Production Core Server Engine Key">
-            <label>Permissions Scope Limit</label>
-            <select id="modalKeyPerm">
-                <option value="Full access">Full access (Can send & track metrics)</option>
-                <option value="Sending access">Sending access restriction limits</option>
-            </select>
-            <div id="keyRevealBox" style="display:none; margin-bottom:24px;">
-                <label style="color:var(--accent-green); font-weight: 600;">✓ Copy token now (It stays visible only once!):</label>
-                <div class="badge-token" id="revealedTokenString" style="word-break:break-all; user-select: all; background: #1a1a1a; padding: 12px; margin-top: 6px;"></div>
+            <div id="settings-usage" class="sub-panel">
+                <div class="document-wrapper"><h4>Infrastructure Volume Metrics</h4><p>Allocated Storage Capacity: <strong>10.00 GB</strong> / Transfer Execution Requests: <strong>Unmetered</strong></p></div>
             </div>
-            <div class="modal-actions">
-                <button class="btn-secondary" onclick="closeModal()">Close</button>
-                <button class="btn-primary" id="modalSubmitBtn" onclick="submitCreateKey()">Generate Key Token</button>
+            <div id="settings-billing" class="sub-panel" style="display:none;">
+                <div class="document-wrapper"><h4>Invoices Framework Billing Configuration</h4><p>Current Active Tier Classification: <strong>Enterprise Managed Instance Tier</strong></p></div>
+            </div>
+            <div id="settings-team" class="sub-panel" style="display:none;">
+                <div class="document-wrapper"><h4>Identity Security Management Team</h4><p>Active Administrative Access Owners: <strong>ubuntu@aws-ec2-node-instance</strong></p></div>
+            </div>
+            <div id="settings-smtp" class="sub-panel" style="display:none;">
+                <div class="metric-card" style="width: 450px;">
+                    <h5>Global Target Notification Admin Email</h5>
+                    <div class="form-row" style="margin-top: 15px;">
+                        <input type="email" id="notifyEmailInput" placeholder="alerts@voltaicmail.xyz">
+                        <button onclick="commitAdminNotificationRoute()">Update Profile Route</button>
+                    </div>
+                </div>
+            </div>
+            <div id="settings-unsubscribe" class="sub-panel" style="display:none;">
+                <div class="document-wrapper"><h4>Unsubscribe Template Compliance Handling</h4><p>Global baseline compliance handling requires injection loop validation mapping across outbound items.</p></div>
+            </div>
+            <div id="settings-documents" class="sub-panel" style="display:none;">
+                <div class="document-wrapper"><h4>Internal Enterprise Deployment Specifications</h4><pre>Configuration Mode: Daemonized PM2 Background Mode
+Active Framework Port Proxy Mapping Rule: iptables Port Forward [80 -> 3000]
+Local Transaction Volume Path Allocation: SQLite Async Module Layer Stack</pre></div>
             </div>
         </div>
-    </div>
+
+        <div id="help" class="view-panel">
+            <h2>Ecosystem Architecture & Software Development Kit Integration Documentation</h2>
+            <div class="document-wrapper">
+                <h3>Workspace Module Package Ingestion</h3>
+                <p>Natively integrate marketing execution pipelines directly into your applications using standard initialization terminal lines:</p>
+                <pre>npm install voltaicmail</pre>
+            </div>
+            <div class="document-wrapper">
+                <h3>Node.js Software Development Kit Initialization Engine Structure</h3>
+                <pre>const VoltaicMail = require('voltaicmail');
+const engine = new VoltaicMail('YOUR_GENERATED_SECURE_TOKEN_HERE');
+
+engine.sendEmail({
+    from: 'marketing@yourdomain.com',
+    to: 'targetclient@gmail.com',
+    subject: 'Mass Campaign Automation Blast',
+    html: '&lt;h1&gt;Live Transmission Running Via Dedicated AWS Box&lt;/h1&gt;'
+}).then(res => console.log("Payload committed mapping:", res));</pre>
+            </div>
+        </div>
+    </main>
 
     <script>
-        async function loadDashboardData() {
-            const metricsRes = await fetch('/api/dashboard-data');
-            const data = await metricsRes.json();
-
-            // Bind Table 1: API Keys
-            const keysBody = document.getElementById('keys-table-body');
-            keysBody.innerHTML = '';
-            if (data.totalKeys > 0 || (data.keys && data.keys.length > 0)) {
-                // Fallback fetching logic directly in row loops
-            }
-            // Fetch explicit keys table stream
-            const kRes = await fetch('/api/keys');
-            const kData = await kRes.json();
-            if(kData.keys && kData.keys.length > 0) {
-                kData.keys.forEach(k => {
-                    keysBody.innerHTML += `<tr>
-                        <td style="color:#fff; font-weight:500;">${k.name}</td>
-                        <td><span class="badge-token">${k.key ? k.key.substring(0,12) + '...' : 'vm_live_...'}</span></td>
-                        <td>${k.permission}</td>
-                        <td>${k.last_used}</td>
-                        <td><button class="btn-delete" style="background:none; border:none; color:#ef4444; cursor:pointer;" onclick="deleteKey(${k.id})"><i data-lucide="trash-2" style="width:14px; height:14px;"></i></button></td>
-                    </tr>`;
-                });
-            } else {
-                keysBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#444; padding:24px;">No active tokens generated.</td></tr>';
-            }
-
-            // Bind Table 2: Sent Outbound Emails Logs
-            const emailsBody = document.getElementById('emails-table-body');
-            emailsBody.innerHTML = '';
-            if(data.emails && data.emails.length > 0) {
-                data.emails.forEach(e => {
-                    emailsBody.innerHTML += `<tr>
-                        <td style="color:#fff;">${e.recipient}</td>
-                        <td>${e.subject}</td>
-                        <td>${e.status}</td>
-                        <td>${new Date(e.sent_at).toLocaleTimeString()}</td>
-                    </tr>`;
-                });
-            } else {
-                emailsBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#444; padding:24px;">No outbox dispatches processed.</td></tr>';
-            }
-
-            // Bind Table 3: Trace Network Logs
-            const logsBody = document.getElementById('logs-table-body');
-            logsBody.innerHTML = '';
-            if(data.logs && data.logs.length > 0) {
-                data.logs.forEach(l => {
-                    logsBody.innerHTML += `<tr>
-                        <td style="font-family:monospace; color:#fff;">${l.endpoint}</td>
-                        <td>${l.method}</td>
-                        <td>${l.status}</td>
-                        <td>${new Date(l.created_at).toLocaleTimeString()}</td>
-                    </tr>`;
-                });
-            } else {
-                logsBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#444; padding:24px;">No activities traced.</td></tr>';
-            }
-
-            // Dynamic Metrics Data Parsing
-            document.getElementById('m-total').innerText = data.metrics.totalEmails;
-            document.getElementById('m-rate').innerText = data.metrics.deliverability + '%';
-            document.getElementById('m-audience').innerText = data.metrics.totalAudience;
-            document.getElementById('m-keys').innerText = data.metrics.totalKeys;
-
-            lucide.createIcons();
+        function switchView(tabId) {
+            document.querySelectorAll('.view-panel').forEach(p => p.style.display = 'none');
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(tabId).style.display = 'block';
+            event.target.classList.add('active');
         }
 
-        async function deleteKey(id) {
-            if(confirm("Confirm structural revocation of this authorized vector key?")) {
-                const res = await fetch(`/api/keys/${id}`, { method: 'DELETE' });
-                const d = await res.json();
-                if(d.success) loadDashboardData();
+        function switchSubSection(parentTab, subId) {
+            const bar = document.getElementById(`${parentTab}SubNav`);
+            bar.querySelectorAll('span').forEach(s => s.classList.remove('active-sub'));
+            event.target.classList.add('active-sub');
+            
+            document.querySelectorAll(`#${parentTab} .sub-panel`).forEach(p => p.style.display = 'none');
+            document.getElementById(`${parentTab}-${subId}`).style.display = 'block';
+        }
+
+        // Persistent Server-Sent Events (SSE) Execution Sync Hub Interface
+        const liveSyncStream = new EventSource('/api/realtime/sync');
+        liveSyncStream.onmessage = function(msgEvent) {
+            const parsedData = JSON.parse(msgEvent.data);
+            if (parsedData.event === 'new_email') {
+                fetchEcosystemMetrics();
+                executeLogSearchQuery();
             }
+        };
+
+        async function fetchEcosystemMetrics() {
+            const tf = document.getElementById('metricsTimeframe').value;
+            const dom = document.getElementById('metricsDomain').value;
+            const res = await fetch(`/api/metrics?timeframe=${tf}&domain=${dom}`);
+            const d = await res.json();
+            
+            document.getElementById('statSent').innerText = d.sent;
+            document.getElementById('statDeliv').innerText = d.deliverabilityRate;
+            document.getElementById('statBounce').innerText = d.bounceRate;
+            document.getElementById('statComp').innerText = d.complaintRate;
         }
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            document.getElementById('nav-' + tabId).classList.add('active');
-            loadDashboardData();
-        }
-
-        function openModal() {
-            document.getElementById('keyModal').style.display = 'flex';
-            document.getElementById('keyRevealBox').style.display = 'none';
-            document.getElementById('modalKeyName').value = '';
-            document.getElementById('modalSubmitBtn').style.display = 'block';
-        }
-        function closeModal() { document.getElementById('keyModal').style.display = 'none'; loadDashboardData(); }
-
-        async function submitCreateKey() {
-            const name = document.getElementById('modalKeyName').value;
-            const permission = document.getElementById('modalKeyPerm').value;
-            if(!name) return alert('Identify identifier required.');
-
-            const res = await fetch('/api/keys', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ name, permission })
-            });
+        async function commitDomainTracking() {
+            const domainName = document.getElementById('domInput').value;
+            const res = await fetch('/api/domains/create', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId: 1, domainName}) });
             const data = await res.json();
-            if(data.success) {
-                document.getElementById('revealedTokenString').innerText = data.key;
-                document.getElementById('keyRevealBox').style.display = 'block';
-                document.getElementById('modalSubmitBtn').style.display = 'none';
-            }
+            
+            document.getElementById('domainTableBody').innerHTML += `<tr>
+                <td><strong>${domainName}</strong></td>
+                <td><span class="badge badge-pending">pending</span></td>
+                <td><code>${data.txtValue}</code></td>
+                <td>Just Now</td>
+            </tr>`;
+            
+            const opt = document.createElement('option');
+            opt.value = domainName; opt.innerText = domainName;
+            document.getElementById('metricsDomain').appendChild(opt);
         }
 
-        window.onload = () => { lucide.createIcons(); };
+        async function commitRecipientProfile() {
+            const email = document.getElementById('audEmail').value;
+            await fetch('/api/audience/contacts/add', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId: 1, email}) });
+            document.getElementById('contactTableBody').innerHTML += `<tr><td>${email}</td><td><span class="badge badge-success">subscribed</span></td><td>Just Now</td></tr>`;
+        }
+
+        async function commitTemplateDesign() {
+            const name = document.getElementById('tmplName').value;
+            const subject = document.getElementById('tmplSubject').value;
+            const html = document.getElementById('tmplHtml').value;
+            await fetch('/api/templates/create', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId:1, name, subject, html}) });
+            
+            document.getElementById('templateTableBody').innerHTML += `<tr><td>GEN</td><td>${name}</td><td>${subject}</td></tr>`;
+        }
+
+        async function commitApiKey() {
+            const name = document.getElementById('keyName').value;
+            const permission = document.getElementById('keyPerm').value;
+            const res = await fetch('/api/keys/create', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({name, permission}) });
+            const data = await res.json();
+            
+            document.getElementById('apiKeyTableBody').innerHTML += `<tr><td>${data.name}</td><td><code>${data.token}</code></td><td>${data.permission}</td><td>Just Now</td></tr>`;
+        }
+
+        async function executeLogSearchQuery() {
+            const status = document.getElementById('logStatusFilter').value;
+            const res = await fetch(`/api/logs/query?status=${status}`);
+            const logsData = await res.json();
+            
+            let compiledRows = "";
+            logsData.forEach(row => {
+                compiledRows += `<tr><td>${row.endpoint}</td><td><code>${row.method}</code></td><td>${row.status}</td><td>${row.user_agent.substring(0,30)}...</td><td><code>${row.api_key_used.substring(0,12)}...</code></td></tr>`;
+            });
+            document.getElementById('logTableBody').innerHTML = compiledRows;
+        }
+
+        async function commitAdminNotificationRoute() {
+            const notifyEmail = document.getElementById('notifyEmailInput').value;
+            await fetch('/api/settings/notify', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId: 1, notifyEmail}) });
+            alert("Administrative notification target route reference point updated.");
+        }
+
+        fetchEcosystemMetrics();
+        executeLogSearchQuery();
     </script>
 </body>
 </html>

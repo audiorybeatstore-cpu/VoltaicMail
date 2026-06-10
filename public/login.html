@@ -3,195 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoltaicMail — Access Portal</title>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        // Paste your exact Firebase Config credentials object here
-        const firebaseConfig = {
-            apiKey: "AIzaSyDeXtcz_9-6wKkkJ8nCvfYqQZaXT-U0Kug",
-            authDomain: "voltaicmail.firebaseapp.com",
-            projectId: "voltaicmail",
-            storageBucket: "voltaicmail.firebasestorage.app",
-            messagingSenderId: "38028187708",
-            appId: "1:38028187708:web:0c3392daea863e1d3d0b39",
-            measurementId: "G-E1Z1BMNKL2"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        // Active Session Guard Router
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                window.location.href = '/index.html';
-            }
-        });
-
-        // 🔐 Action Mechanism 1: User Login Auth Dispatch
-        window.executeSignIn = async function(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const pass = document.getElementById('login-pass').value;
-            const errBox = document.getElementById('login-error');
-            errBox.style.display = 'none';
-
-            try {
-                await signInWithEmailAndPassword(auth, email, pass);
-                window.location.href = '/index.html';
-            } catch (error) {
-                errBox.innerText = error.message.replace("Firebase: ", "");
-                errBox.style.display = 'block';
-            }
-        }
-
-        // 🔐 Action Mechanism 2: User Account Creation Dispatch
-        window.executeSignUp = async function(e) {
-            e.preventDefault();
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
-            const errBox = document.getElementById('reg-error');
-            errBox.style.display = 'none';
-
-            try {
-                await createUserWithEmailAndPassword(auth, email, pass);
-                window.location.href = '/index.html';
-            } catch (error) {
-                errBox.innerText = error.message.replace("Firebase: ", "");
-                errBox.style.display = 'block';
-            }
-        }
-    </script>
-
+    <title>VoltaicMail - Access Management</title>
     <style>
-        :root {
-            --bg-main: #000000;
-            --border-color: #111111;
-            --text-primary: #ffffff;
-            --text-secondary: #888888;
-            --interactive-hover: #161616;
-            --transition-speed: 0.25s;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .auth-master-wrapper {
-            width: 100%;
-            max-width: 400px;
-            padding: 40px 24px;
-            position: relative;
-        }
-
-        .brand-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 40px;
-            text-align: center;
-        }
-        .brand-logo {
-            width: 32px;
-            height: 32px;
-            border: 1px solid var(--text-primary);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .brand-logo i { width: 16px; height: 16px; }
-        h1 { font-size: 20px; font-weight: 500; letter-spacing: -0.4px; }
-        p.subtitle { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
-
-        /* Dynamic Panel Toggle Container */
-        .auth-view-card { display: none; }
-        .auth-view-card.active { display: block; animation: slideUp var(--transition-speed) cubic-bezier(0.16, 1, 0.3, 1); }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500; }
-        input { width: 100%; padding: 12px 14px; background: #050505; border: 1px solid var(--border-color); border-radius: 6px; color: #fff; margin-bottom: 24px; font-size: 13px; transition: border-color var(--transition-speed); }
-        input:focus { border-color: #333333; outline: none; background: #000; }
-
-        .btn-submit { width: 100%; background-color: #ffffff; color: #000000; padding: 12px; border-radius: 6px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; transition: opacity var(--transition-speed); display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-submit:hover { opacity: 0.9; }
-
-        .switch-prompt { text-align: center; font-size: 13px; color: var(--text-secondary); margin-top: 24px; }
-        .switch-link { color: var(--text-primary); text-decoration: none; cursor: pointer; font-weight: 500; }
-        .switch-link:hover { text-decoration: underline; }
-
-        .error-banner { background-color: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; font-size: 13px; padding: 12px; border-radius: 6px; margin-bottom: 24px; display: none; line-height: 1.4; }
+        body { background: #060913; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .auth-container { background: #0b1120; border: 1px solid #1e293b; padding: 40px; border-radius: 12px; width: 100%; max-width: 420px; box-sizing: border-box; }
+        .tabs { display: flex; border-bottom: 1px solid #1e293b; margin-bottom: 25px; }
+        .tab-btn { flex: 1; padding: 12px; text-align: center; cursor: pointer; color: #64748b; font-weight: 600; border-bottom: 2px solid transparent; }
+        .tab-btn.active { color: #3b82f6; border-color: #3b82f6; }
+        .form-group { margin-bottom: 20px; position: relative; }
+        label { display: block; margin-bottom: 8px; font-size: 14px; color: #94a3b8; font-weight: 500; }
+        input { width: 100%; background: #0f172a; border: 1px solid #334155; padding: 12px 16px; border-radius: 8px; color: #ffffff; font-size: 15px; box-sizing: border-box; outline: none; transition: border 0.15s; }
+        input:focus { border-color: #3b82f6; }
+        .password-wrapper { position: relative; display: flex; align-items: center; }
+        .toggle-password { position: absolute; right: 14px; cursor: pointer; display: flex; align-items: center; color: #64748b; }
+        .toggle-password:hover { color: #94a3b8; }
+        .toggle-password svg { width: 20px; height: 20px; }
+        button { width: 100%; background: #2563eb; color: #ffffff; border: none; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.15s; margin-top: 10px; }
+        button:hover { background: #1d4ed8; }
+        .msg { margin-top: 15px; font-size: 14px; text-align: center; line-height: 1.5; }
+        .msg-success { color: #10b981; }
+        .msg-error { color: #ef4444; }
+        .verify-link-wrapper { background: #15213d; border: 1px solid #1e3a8a; padding: 12px; border-radius: 6px; margin-top: 15px; word-break: break-all; text-align: left; }
+        .verify-link-wrapper a { color: #60a5fa; font-weight: 600; text-decoration: none; }
+        .verify-link-wrapper a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
-    <div class="auth-master-wrapper">
-        <div class="brand-header">
-            <div class="brand-logo"><i data-lucide="zap"></i></div>
-            <div>
-                <h1>VoltaicMail</h1>
-                <p class="subtitle">Secure Delivery Communication Platform Engine</p>
+    <div class="auth-container">
+        <div class="tabs">
+            <div class="tab-btn active" id="loginTab" onclick="switchAuthMode('login')">Sign In</div>
+            <div class="tab-btn" id="signupTab" onclick="switchAuthMode('signup')">Create Account</div>
+        </div>
+
+        <form id="authForm" onsubmit="handleAuthSubmit(event)">
+            <div class="form-group">
+                <label for="email">Workspace Email</label>
+                <input type="email" id="email" required placeholder="name@company.com">
             </div>
-        </div>
 
-        <!-- VIEW A: SIGN IN FORM -->
-        <div id="panel-login" class="auth-view-card active">
-            <div class="error-banner" id="login-error"></div>
-            <form onsubmit="executeSignIn(event)">
-                <label>Account Email Address</label>
-                <input type="email" id="login-email" required autocomplete="username">
-                
-                <label>Security Access Password</label>
-                <input type="password" id="login-pass" required autocomplete="current-password">
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" required placeholder="••••••••">
+                    <span class="toggle-password" onclick="togglePasswordVisibility('password')">
+                        <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </span>
+                </div>
+            </div>
 
-                <button type="submit" class="btn-submit">Sign in to Dashboard <i data-lucide="arrow-right" style="width:14px; height:14px;"></i></button>
-            </form>
-            <div class="switch-prompt">Don't have an account? <span class="switch-link" onclick="toggleAuthPanel('register')">Sign up free</span></div>
-        </div>
+            <button type="submit" id="submitBtn">Authenticate</button>
+        </form>
 
-        <!-- VIEW B: SIGN UP FORM -->
-        <div id="panel-register" class="auth-view-card">
-            <div class="error-banner" id="reg-error"></div>
-            <form onsubmit="executeSignUp(event)">
-                <label>Your Workspace Email Address</label>
-                <input type="email" id="reg-email" required autocomplete="username">
-                
-                <label>Create API Authorization Password</label>
-                <input type="password" id="reg-pass" required autocomplete="new-password">
-
-                <button type="submit" class="btn-submit">Create Developer Account <i data-lucide="arrow-right" style="width:14px; height:14px;"></i></button>
-            </form>
-            <div class="switch-prompt">Already possess an active profile? <span class="switch-link" onclick="toggleAuthPanel('login')">Sign in</span></div>
-        </div>
+        <div id="feedbackMsg" class="msg"></div>
     </div>
 
     <script>
-        function toggleAuthPanel(target) {
-            document.querySelectorAll('.auth-view-card').forEach(p => p.classList.remove('active'));
-            if(target === 'register') {
-                document.getElementById('panel-register').classList.add('active');
+        let currentMode = 'login';
+
+        function switchAuthMode(mode) {
+            currentMode = mode;
+            const loginTab = document.getElementById('loginTab');
+            const signupTab = document.getElementById('signupTab');
+            const submitBtn = document.getElementById('submitBtn');
+            const feedbackMsg = document.getElementById('feedbackMsg');
+            
+            feedbackMsg.innerHTML = '';
+            
+            if (mode === 'login') {
+                loginTab.classList.add('active');
+                signupTab.classList.remove('active');
+                submitBtn.innerText = 'Authenticate';
             } else {
-                document.getElementById('panel-login').classList.add('active');
+                signupTab.classList.add('active');
+                loginTab.classList.remove('active');
+                submitBtn.innerText = 'Register Platform Instance';
             }
         }
-        window.onload = () => { lucide.createIcons(); }
+
+        function togglePasswordVisibility(fieldId) {
+            const input = document.getElementById(fieldId);
+            const eyeIcon = document.getElementById('eyeIcon');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                eyeIcon.innerHTML = `
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                    <path d="M9 9a3 3 0 1 1-4.24-4.24"></path>
+                    <path d="M12 5c.67 0 1.35.09 2 .26M17.61 5.61A10.29 10.29 0 0 1 23 12s-4 8-11 8c-1.66 0-3.2-.37-4.59-1M3.61 11.39A10.24 10.24 0 0 1 1 12s4-8 11-8"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                `;
+            } else {
+                input.type = 'password';
+                eyeIcon.innerHTML = `
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                `;
+            }
+        }
+
+        async function handleAuthSubmit(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const feedbackMsg = document.getElementById('feedbackMsg');
+            
+            feedbackMsg.innerHTML = '';
+
+            if (currentMode === 'signup') {
+                try {
+                    const res = await fetch('/api/auth/signup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    const data = await res.json();
+                    
+                    if (!res.ok) throw new Error(data.error || 'Registration failed.');
+                    
+                    feedbackMsg.className = 'msg msg-success';
+                    feedbackMsg.innerHTML = `
+                        <div>Registration complete. Please simulate email validation by clicking the active token link below:</div>
+                        <div class="verify-link-wrapper">
+                            <a href="${data.verifyLink}" target="_blank">Verify Account Framework</a>
+                        </div>
+                    `;
+                } catch (err) {
+                    feedbackMsg.className = 'msg msg-error';
+                    feedbackMsg.innerText = err.message;
+                }
+            } else {
+                feedbackMsg.className = 'msg msg-success';
+                feedbackMsg.innerText = 'Authentication successful! Loading workspace...';
+                setTimeout(() => {
+                    window.location.href = '/index.html';
+                }, 1000);
+            }
+        }
     </script>
 </body>
 </html>
