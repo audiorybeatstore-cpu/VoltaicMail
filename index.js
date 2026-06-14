@@ -117,6 +117,58 @@ export class VoltaicMailEngine {
             }
         });
 
+        // Forgot Password Request Handler
+        this.app.post('/api/auth/forgot-password', async (req, res) => {
+            const { email } = req.body;
+            if (!email) return res.status(400).json({ error: "Email address is required." });
+
+            try {
+                const user = await this.db.get(`SELECT id FROM users WHERE email = ?`, [email]);
+                if (!user) {
+                    // Security Best Practice: Don't explicitly reveal if an email doesn't exist
+                    return res.json({ success: true, message: "If the account exists, a reset link has been compiled." });
+                }
+
+                const token = crypto.randomBytes(32).toString('hex');
+                const expires = Date.now() + 3600000; // 1 Hour lifespan
+
+                await this.db.run(`UPDATE users SET reset_token = ?, reset_expires = ? WHERE id = ?`, [token, expires, user.id]);
+                
+                // Real launch environment fallback simulation link
+                res.json({ 
+                    success: true, 
+                    message: "Reset link compiled safely.", 
+                    link: `/login.html?token=${token}` 
+                });
+            } catch (err) {
+                res.status(500).json({ error: "Reset engine processing failure." });
+            }
+        });
+
+        // Reset Password Form Action Handler
+        this.app.post('/api/auth/reset-password', async (req, res) => {
+            const { token, newPassword } = req.body;
+            if (!token || !newPassword) return res.status(400).json({ error: "Missing required update parameter attributes." });
+
+            try {
+                const user = await this.db.get(`SELECT id, reset_expires FROM users WHERE reset_token = ?`, [token]);
+                if (!user) return res.status(400).json({ error: "Invalid or expired authorization reset token link." });
+
+                if (Date.now() > user.reset_expires) {
+                    return res.status(400).json({ error: "Password reset sequence has expired." });
+                }
+
+                await this.db.run(
+                    `UPDATE users SET password = ?, reset_token = NULL, reset_expires = NULL WHERE id = ?`, 
+                    [newPassword, user.id]
+                );
+
+                res.json({ success: true, message: "Your account password has been updated completely." });
+            } catch (err) {
+                res.status(500).json({ error: "Failed to update profile access keys configurations." });
+            }
+        });
+
         this.app.post('/api/auth/logout', (req, res) => {
             req.session.destroy(err => {
                 if (err) return res.status(500).json({ error: "Could not log out." });
@@ -453,7 +505,9 @@ export class VoltaicMailEngine {
                     password TEXT,
                     is_verified INTEGER DEFAULT 0,
                     verification_token TEXT,
-                    admin_notify_email TEXT DEFAULT ''
+                    admin_notify_email TEXT DEFAULT '',
+                    reset_token TEXT,
+                    reset_expires INTEGER
                 );
                 CREATE TABLE IF NOT EXISTS domains (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,

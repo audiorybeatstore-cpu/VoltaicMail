@@ -3,51 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoltaicMail - Production Delivery Infrastructure Access</title>
+    <title>VoltaicMail — Control Plane Access</title>
     <style>
-        body { background: #060913; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        .auth-container { background: #0b1120; border: 1px solid #1e293b; padding: 40px; border-radius: 12px; width: 100%; max-width: 440px; box-sizing: border-box; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
-        .tabs { display: flex; border-bottom: 1px solid #1e293b; margin-bottom: 25px; }
-        .tab-btn { flex: 1; padding: 12px; text-align: center; cursor: pointer; color: #64748b; font-weight: 600; border-bottom: 2px solid transparent; transition: all 0.2s; }
-        .tab-btn.active { color: #3b82f6; border-color: #3b82f6; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-size: 14px; color: #94a3b8; font-weight: 500; }
-        input { width: 100%; background: #0f172a; border: 1px solid #334155; padding: 12px 16px; border-radius: 8px; color: #ffffff; font-size: 15px; box-sizing: border-box; outline: none; transition: border-color 0.15s; }
-        input:focus { border-color: #3b82f6; }
-        .password-wrapper { position: relative; display: flex; align-items: center; }
-        .toggle-password { position: absolute; right: 14px; cursor: pointer; display: flex; align-items: center; color: #64748b; background: none; border: none; padding: 0; }
-        .toggle-password:hover { color: #94a3b8; }
-        .toggle-password svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        button.submit-btn { width: 100%; background: #2563eb; color: #ffffff; border: none; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.15s; margin-top: 10px; }
-        button.submit-btn:hover { background: #1d4ed8; }
-        .msg { margin-top: 15px; font-size: 14px; text-align: center; line-height: 1.5; padding: 12px; border-radius: 6px; display: none; }
-        .msg-success { color: #10b981; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); }
-        .msg-error { color: #ef4444; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); }
-        .verification-card { background: #15213d; border: 1px solid #1e3a8a; padding: 14px; border-radius: 8px; margin-top: 15px; text-align: left; }
-        .verification-card p { margin: 0 0 10px 0; font-size: 13px; color: #94a3b8; }
-        .verification-card a { color: #60a5fa; font-weight: 600; text-decoration: none; word-break: break-all; font-family: monospace; }
-        .verification-card a:hover { text-decoration: underline; }
+        :root {
+            --bg: #000000;
+            --surface: #0a0a0a;
+            --surface-raised: #141414;
+            --border: #262626;
+            --border-focus: #404040;
+            --text: #ffffff;
+            --text-muted: #a3a3a3;
+            --text-dim: #737373;
+            --accent: #ffffff;
+            --accent-dim: #e5e5e5;
+            --error: #f43f5e;
+            --error-bg: #110c0e;
+            --success: #10b981;
+            --success-bg: #06120e;
+        }
+
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            margin: 0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .auth-container { 
+            background: var(--surface); 
+            border: 1px solid var(--border); 
+            padding: 40px; 
+            border-radius: 0px; 
+            width: 100%; 
+            max-width: 420px; 
+            box-sizing: border-box; 
+        }
+
+        .brand-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            stroke: var(--text);
+            margin-bottom: 12px;
+        }
+
+        .brand-header h1 {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0;
+            letter-spacing: -0.025em;
+        }
+
+        .brand-header p {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin: 4px 0 0 0;
+        }
+
+        .tabs { 
+            display: flex; 
+            border-bottom: 1px solid var(--border); 
+            margin-bottom: 28px; 
+        }
+
+        .tab-btn { 
+            flex: 1; 
+            padding: 10px; 
+            text-align: center; 
+            cursor: pointer; 
+            color: var(--text-dim); 
+            font-size: 13px;
+            font-weight: 500; 
+            border-bottom: 1px solid transparent; 
+            transition: all 0.15s ease;
+            margin-bottom: -1px;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-muted);
+        }
+
+        .tab-btn.active { 
+            color: var(--text); 
+            border-bottom: 1px solid var(--text); 
+        }
+
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        label { 
+            font-size: 12px; 
+            color: var(--text-muted); 
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500; 
+        }
+
+        .forgot-link {
+            font-size: 12px;
+            color: var(--text-dim);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .forgot-link:hover {
+            color: var(--text);
+        }
+
+        input { 
+            width: 100%; 
+            background: var(--surface-raised); 
+            border: 1px solid var(--border); 
+            padding: 12px 14px; 
+            border-radius: 0px; 
+            color: var(--text); 
+            font-size: 14px; 
+            box-sizing: border-box; 
+            outline: none; 
+            transition: border-color 0.1s ease; 
+        }
+
+        input:focus { 
+            border-color: var(--border-focus); 
+        }
+
+        .password-wrapper { 
+            position: relative; 
+            display: flex; 
+            align-items: center; 
+        }
+
+        .password-wrapper input {
+            padding-right: 44px;
+        }
+
+        .toggle-password { 
+            position: absolute; 
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 44px;
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            color: var(--text-dim); 
+            background: none; 
+            border: none; 
+            padding: 0; 
+        }
+
+        .toggle-password:hover { 
+            color: var(--text-muted); 
+        }
+
+        .toggle-password svg { 
+            width: 16px; 
+            height: 16px; 
+            fill: none; 
+            stroke: currentColor; 
+            stroke-width: 2; 
+            stroke-linecap: round; 
+            stroke-linejoin: round; 
+        }
+
+        button.submit-btn { 
+            width: 100%; 
+            background: var(--accent); 
+            color: var(--bg); 
+            border: 1px solid var(--accent); 
+            padding: 12px; 
+            border-radius: 0px; 
+            font-size: 14px; 
+            font-weight: 500; 
+            cursor: pointer; 
+            transition: all 0.1s ease; 
+            margin-top: 8px; 
+        }
+
+        button.submit-btn:hover { 
+            background: var(--bg);
+            color: var(--text);
+            border-color: var(--border-focus);
+        }
+
+        .msg { 
+            margin-top: 20px; 
+            font-size: 13px; 
+            line-height: 1.5; 
+            padding: 12px; 
+            border-radius: 0px; 
+            display: none; 
+        }
+
+        .msg-success { 
+            color: var(--success); 
+            background: var(--success-bg); 
+            border: 1px solid rgba(16, 185, 129, 0.15); 
+        }
+
+        .msg-error { 
+            color: var(--error); 
+            background: var(--error-bg); 
+            border: 1px solid rgba(244, 63, 94, 0.15); 
+        }
+
+        .verification-card { 
+            background: var(--surface-raised); 
+            border: 1px solid var(--border); 
+            padding: 14px; 
+            margin-top: 20px; 
+            text-align: left; 
+        }
+
+        .verification-card p { 
+            margin: 0 0 8px 0; 
+            font-size: 12px; 
+            color: var(--text-muted); 
+        }
+
+        .verification-card a { 
+            color: var(--text); 
+            font-weight: 500; 
+            text-decoration: underline; 
+            word-break: break-all; 
+            font-family: monospace; 
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
 
     <div class="auth-container">
-        <div class="tabs">
+        <div class="brand-header">
+            <svg class="brand-logo" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <h1 id="brandTitle">VoltaicMail</h1>
+            <p id="brandSubtitle">Delivery Engine Infrastructure</p>
+        </div>
+
+        <div class="tabs" id="authTabs">
             <div class="tab-btn active" id="loginTab" onclick="switchAuthMode('login')">Sign In</div>
             <div class="tab-btn" id="signupTab" onclick="switchAuthMode('signup')">Create Account</div>
         </div>
 
         <form id="authForm" onsubmit="handleAuthSubmit(event)">
-            <div class="form-group">
-                <label for="email">Workspace Email</label>
-                <input type="email" id="email" required placeholder="name@company.com">
+            <div class="form-group" id="emailGroup">
+                <div class="label-row">
+                    <label for="email">Email Address</label>
+                    <a class="forgot-link" id="forgotLink" onclick="switchAuthMode('forgot')">Forgot?</a>
+                </div>
+                <input type="email" id="email" placeholder="name@domain.com">
             </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
+            <div class="form-group" id="passwordGroup">
+                <div class="label-row">
+                    <label id="passwordLabel" for="password">Password</label>
+                </div>
                 <div class="password-wrapper">
-                    <input type="password" id="password" required placeholder="••••••••">
-                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility()" aria-label="Toggle password visibility">
+                    <input type="password" id="password" placeholder="••••••••">
+                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility()" aria-label="Toggle password view state">
                         <svg id="eyeIcon" viewBox="0 0 24 24">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                             <circle cx="12" cy="12" r="3"></circle>
@@ -65,14 +298,72 @@
 
     <script>
         let currentMode = 'login';
+        let resetToken = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            if (token) {
+                resetToken = token;
+                switchAuthMode('reset');
+            }
+        });
 
         function switchAuthMode(mode) {
             currentMode = mode;
-            document.getElementById('loginTab').classList.toggle('active', mode === 'login');
-            document.getElementById('signupTab').classList.toggle('active', mode === 'signup');
-            document.getElementById('submitBtn').innerText = mode === 'login' ? 'Authenticate' : 'Register Platform Instance';
+            const loginTab = document.getElementById('loginTab');
+            const signupTab = document.getElementById('signupTab');
+            const authTabs = document.getElementById('authTabs');
+            const emailGroup = document.getElementById('emailGroup');
+            const passwordGroup = document.getElementById('passwordGroup');
+            const passwordLabel = document.getElementById('passwordLabel');
+            const forgotLink = document.getElementById('forgotLink');
+            const submitBtn = document.getElementById('submitBtn');
+            const brandTitle = document.getElementById('brandTitle');
+            const brandSubtitle = document.getElementById('brandSubtitle');
+            
             document.getElementById('feedbackMsg').style.display = 'none';
             document.getElementById('verifyBlock').style.display = 'none';
+
+            // Reset generic input requirements
+            document.getElementById('email').required = false;
+            document.getElementById('password').required = false;
+
+            if (mode === 'login' || mode === 'signup') {
+                authTabs.style.display = 'flex';
+                emailGroup.style.display = 'block';
+                passwordGroup.style.display = 'block';
+                forgotLink.style.display = 'block';
+                passwordLabel.innerText = 'Password';
+                brandTitle.innerText = 'VoltaicMail';
+                brandSubtitle.innerText = 'Delivery Engine Infrastructure';
+                
+                document.getElementById('email').required = true;
+                document.getElementById('password').required = true;
+
+                loginTab.classList.toggle('active', mode === 'login');
+                signupTab.classList.toggle('active', mode === 'signup');
+                submitBtn.innerText = mode === 'login' ? 'Authenticate' : 'Provision Instance';
+            } else if (mode === 'forgot') {
+                authTabs.style.display = 'none';
+                emailGroup.style.display = 'block';
+                passwordGroup.style.display = 'none';
+                brandTitle.innerText = 'Recover Account';
+                brandSubtitle.innerText = 'Request security verification link';
+                
+                document.getElementById('email').required = true;
+                submitBtn.innerText = 'Issue Reset Instructions';
+            } else if (mode === 'reset') {
+                authTabs.style.display = 'none';
+                emailGroup.style.display = 'none';
+                passwordGroup.style.display = 'block';
+                passwordLabel.innerText = 'New Secure Password';
+                brandTitle.innerText = 'Update Password';
+                brandSubtitle.innerText = 'Re-establishing access security layer';
+                
+                document.getElementById('password').required = true;
+                submitBtn.innerText = 'Save Changes';
+            }
         }
 
         function togglePasswordVisibility() {
@@ -82,10 +373,8 @@
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 eyeIcon.innerHTML = `
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
                     <line x1="1" y1="1" x2="23" y2="23"></line>
-                    <path d="M9 9a3 3 0 1 1-4.24-4.24"></path>
-                    <path d="M12 5c.67 0 1.35.09 2 .26M17.61 5.61A10.29 10.29 0 0 1 23 12s-4 8-11 8c-1.66 0-3.2-.37-4.59-1M3.61 11.39A10.24 10.24 0 0 1 1 12s4-8 11-8"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
                 `;
             } else {
                 passwordInput.type = 'password';
@@ -106,36 +395,68 @@
             msg.style.display = 'none';
             verifyBlock.style.display = 'none';
 
+            let endpoint = '/api/auth/login';
+            let payload = { email, password };
+
             if (currentMode === 'signup') {
-                try {
-                    const res = await fetch('/api/auth/signup', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, password })
-                    });
-                    const data = await res.json();
-                    if (!res.ok) throw new Error(data.error || 'Registration failed.');
-                    
+                endpoint = '/api/auth/signup';
+            } else if (currentMode === 'forgot') {
+                endpoint = '/api/auth/forgot-password';
+                payload = { email };
+            } else if (currentMode === 'reset') {
+                endpoint = '/api/auth/reset-password';
+                payload = { token: resetToken, newPassword: password };
+            }
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Pipeline execution failure.');
+
+                if (currentMode === 'signup') {
                     msg.className = 'msg msg-success';
-                    msg.innerText = 'Account provisioned successfully. Activation framework required.';
+                    msg.innerText = 'Identity registered. Activation token generated below.';
                     msg.style.display = 'block';
 
                     verifyBlock.className = 'verification-card';
                     verifyBlock.innerHTML = `
-                        <p><strong>Security Sandbox:</strong> Please verify your email by executing this activation endpoint token:</p>
-                        <a href="${data.verifyLink}" target="_blank">${window.location.origin}${data.verifyLink}</a>
+                        <p><strong>Sandbox Simulator Pipeline:</strong> Click to mock automated registration link safely:</p>
+                        <a href="${data.link}" target="_blank">${window.location.origin}${data.link}</a>
                     `;
                     verifyBlock.style.display = 'block';
-                } catch (err) {
-                    msg.className = 'msg msg-error';
-                    msg.innerText = err.message;
+                } else if (currentMode === 'forgot') {
+                    msg.className = 'msg msg-success';
+                    msg.innerText = data.message;
                     msg.style.display = 'block';
+
+                    if (data.link) {
+                        verifyBlock.className = 'verification-card';
+                        verifyBlock.innerHTML = `
+                            <p><strong>Sandbox Simulator Pipeline:</strong> Recovery token compiled:</p>
+                            <a href="${data.link}">${window.location.origin}${data.link}</a>
+                        `;
+                        verifyBlock.style.display = 'block';
+                    }
+                } else if (currentMode === 'reset') {
+                    msg.className = 'msg msg-success';
+                    msg.innerText = 'Credentials updated. Redirecting to initialization...';
+                    msg.style.display = 'block';
+                    setTimeout(() => { switchAuthMode('login'); }, 1500);
+                } else {
+                    msg.className = 'msg msg-success';
+                    msg.innerText = 'Authorized. Constructing active control panel context...';
+                    msg.style.display = 'block';
+                    setTimeout(() => { window.location.href = '/index.html'; }, 800);
                 }
-            } else {
-                msg.className = 'msg msg-success';
-                msg.innerText = 'Validation confirmed. Initializing workspace...';
+            } catch (err) {
+                msg.className = 'msg msg-error';
+                msg.innerText = err.message;
                 msg.style.display = 'block';
-                setTimeout(() => { window.location.href = '/index.html'; }, 800);
             }
         }
     </script>

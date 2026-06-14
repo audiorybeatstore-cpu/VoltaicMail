@@ -1,23 +1,15 @@
 {
-  "name": "voltaicmail",
+  "name": "mail-system",
   "version": "1.0.0",
-  "description": "A powerful multi-tenant email engine and tracking platform.",
+  "description": "",
   "main": "index.js",
-  "type": "module",
-  "bin": {
-    "voltaicmail": "./index.js"
-  },
   "scripts": {
-    "start": "node index.js"
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "email",
-    "mail-engine",
-    "resend",
-    "nodemailer"
-  ],
-  "author": "Ismael",
-  "license": "MIT",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "connect-sqlite3": "^0.9.16",
     "express": "^5.2.1",
@@ -25,5 +17,8 @@
     "nodemailer": "^8.0.10",
     "sqlite": "^5.1.1",
     "sqlite3": "^6.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }

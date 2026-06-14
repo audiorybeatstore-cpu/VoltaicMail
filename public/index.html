@@ -3,18 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoltaicMail Core Delivery Dashboard</title>
+    <title>VoltaicMail — Control Plane</title>
     <style>
         :root { 
-            --bg: #060913; 
-            --panel: #0b1120; 
-            --border: #1e293b; 
-            --text: #e2e8f0; 
-            --accent: #2563eb; 
-            --accent-hover: #1d4ed8;
-            --success: #059669;
-            --danger: #dc2626;
-            --muted: #94a3b8;
+            --bg: #000000; 
+            --panel: #0a0a0a; 
+            --panel-raised: #141414;
+            --border: #262626; 
+            --border-focus: #404040;
+            --text: #ffffff; 
+            --text-muted: #a3a3a3;
+            --text-dim: #737373;
+            --accent: #ffffff; 
+            --accent-hover: #e5e5e5;
+            --success: #10b981;
+            --success-bg: #06120e;
+            --danger: #f43f5e;
+            --danger-bg: #110c0e;
+            --warning: #f59e0b;
         }
         
         * { box-sizing: border-box; }
@@ -22,22 +28,23 @@
         body { 
             background: var(--bg); 
             color: var(--text); 
-            font-family: system-ui, -apple-system, sans-serif; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             margin: 0; 
             padding: 0; 
             display: flex; 
             height: 100vh; 
             overflow: hidden; 
+            -webkit-font-smoothing: antialiased;
         }
 
         /* Scrollbar Optimization */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+        ::-webkit-scrollbar-thumb { background: var(--border); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-focus); }
 
         aside { 
-            width: 280px; 
+            width: 260px; 
             background: var(--panel); 
             border-right: 1px solid var(--border); 
             padding: 24px 16px; 
@@ -61,32 +68,31 @@
             align-items: center;
             gap: 12px;
             padding: 10px 14px; 
-            margin-bottom: 4px; 
-            border-radius: 6px; 
-            color: var(--muted); 
+            margin-bottom: 2px; 
+            color: var(--text-muted); 
             cursor: pointer; 
             font-weight: 500; 
-            font-size: 14px;
-            transition: all 0.2s ease;
+            font-size: 13px;
+            transition: all 0.1s ease;
         }
         
         .nav-item:hover, .nav-item.active { 
-            background: #1e293b; 
-            color: #fff; 
+            background: var(--panel-raised); 
+            color: var(--text); 
         }
         
         .nav-item svg {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             stroke: currentColor;
             fill: none;
             stroke-width: 2;
         }
         
         .sub-nav { 
-            margin-left: 24px; 
+            margin-left: 20px; 
             border-left: 1px solid var(--border);
-            padding-left: 8px;
+            padding-left: 4px;
             display: none; 
         }
         
@@ -96,59 +102,100 @@
             background: var(--panel); 
             border: 1px solid var(--border); 
             padding: 24px; 
-            border-radius: 8px; 
             margin-bottom: 24px; 
         }
         
         .input-group {
             position: relative;
             width: 100%;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        label { 
+            font-size: 11px; 
+            color: var(--text-muted); 
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500; 
         }
         
         input, select, textarea { 
-            background: #1e293b; 
+            background: var(--panel-raised); 
             border: 1px solid var(--border); 
             color: #fff; 
-            padding: 10px 14px; 
-            border-radius: 6px; 
+            padding: 12px 14px; 
             font-size: 14px; 
             width: 100%;
             outline: none;
-            transition: border-color 0.2s;
+            transition: border-color 0.1s ease;
         }
         
         input:focus, select:focus, textarea:focus {
-            border-color: var(--accent);
+            border-color: var(--border-focus);
         }
         
         .password-toggle {
             position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 44px;
             cursor: pointer;
-            color: var(--muted);
+            color: var(--text-dim);
             display: flex;
             align-items: center;
+            justify-content: center;
         }
         
-        .password-toggle:hover { color: #fff; }
-        .password-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+        .password-toggle:hover { color: var(--text-muted); }
+        .password-toggle svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }
         
         button { 
             background: var(--accent); 
-            color: white; 
-            padding: 10px 20px; 
-            border: none; 
-            border-radius: 6px; 
+            color: var(--bg); 
+            padding: 12px 20px; 
+            border: 1px solid var(--accent); 
             cursor: pointer; 
-            font-weight: 600; 
+            font-weight: 500; 
             font-size: 14px;
-            transition: background 0.2s;
+            transition: all 0.1s ease;
         }
         
-        button:hover { background: var(--accent-hover); }
+        button:hover { 
+            background: var(--bg); 
+            color: var(--text);
+            border-color: var(--border-focus);
+        }
+
+        button.btn-secondary {
+            background: transparent;
+            color: var(--text-muted);
+            border-color: var(--border);
+        }
+
+        button.btn-secondary:hover {
+            color: var(--text);
+            border-color: var(--border-focus);
+        }
+
+        button.btn-danger {
+            background: var(--danger-bg);
+            color: var(--danger);
+            border-color: rgba(244, 63, 94, 0.2);
+        }
+
+        button.btn-danger:hover {
+            background: var(--danger);
+            color: var(--bg);
+            border-color: var(--danger);
+        }
         
         .table-container {
             width: 100%;
@@ -165,12 +212,12 @@
             text-align: left; 
             padding: 14px; 
             border-bottom: 1px solid var(--border); 
-            font-size: 14px;
+            font-size: 13px;
         }
         
         th { 
-            color: var(--muted); 
-            font-size: 13px; 
+            color: var(--text-dim); 
+            font-size: 11px; 
             font-weight: 600; 
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -198,61 +245,64 @@
             overflow-y: auto;
         }
         
-        h2 { margin-top: 0; font-weight: 700; font-size: 24px; }
-        h3 { margin-top: 0; font-weight: 600; font-size: 16px; color: #fff; }
-        code, pre { font-family: monospace; font-size: 13px; color: #a7f3d0; }
+        h2 { margin: 0 0 20px 0; font-weight: 500; font-size: 20px; letter-spacing: -0.02em; }
+        h3 { margin: 0; font-weight: 500; font-size: 14px; color: #fff; }
+        code, pre { font-family: monospace; font-size: 12px; color: #a7f3d0; }
+        pre { background: var(--panel-raised) !important; border: 1px solid var(--border); padding: 16px; margin: 0; overflow-x: auto; }
     </style>
 </head>
 <body>
 
-    <!-- Updated Identity and Auth Gate Container Layout -->
     <div id="auth-gate">
-        <div class="card" style="width: 100%; max-width: 420px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);">
-            <div style="display: flex; justify-content: center; margin-bottom: 16px;">
-                <svg style="width:48px; height:48px; color:var(--accent);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        <div class="card" style="width: 100%; max-width: 400px; padding: 40px;">
+            <div style="display: flex; justify-content: center; margin-bottom: 24px;">
+                <svg style="width:36px; height:36px; stroke:var(--accent);" viewBox="0 0 24 24" fill="none" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                 </svg>
             </div>
-            <h2 style="color: #fff; margin-bottom: 8px;">VoltaicMail Identity</h2>
-            <p style="color: var(--muted); font-size:13px; margin-bottom: 24px;">Verify your identity to read documents and manage projects.</p>
+            <h2 style="text-align: center; margin-bottom: 6px;">Control Plane Identity</h2>
+            <p style="color: var(--text-dim); font-size:13px; text-align: center; margin: 0 0 32px 0;">Establish secure session authorization context</p>
             
             <div class="input-group">
-                <input type="email" id="auth-email" placeholder="Email Address">
+                <div class="label-row"><label for="auth-email">Workspace Email</label></div>
+                <input type="email" id="auth-email" placeholder="name@domain.com">
             </div>
             
             <div class="input-group">
-                <input type="password" id="auth-password" placeholder="Password">
-                <div class="password-toggle" onclick="togglePasswordVisibility('auth-password')">
-                    <svg id="auth-password-icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <div class="label-row"><label for="auth-password">Account Password</label></div>
+                <div class="password-wrapper" style="position: relative;">
+                    <input type="password" id="auth-password" placeholder="••••••••" style="padding-right: 44px;">
+                    <div class="password-toggle" onclick="togglePasswordVisibility('auth-password')">
+                        <svg id="auth-password-icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </div>
                 </div>
             </div>
             
-            <button onclick="handleLogin()" style="width:100%; margin-bottom:10px;">Sign In to Engine</button>
-            <button onclick="handleSignup()" style="background: var(--success); width:100%; margin-bottom: 16px;">Register Account Pipeline</button>
+            <button onclick="handleLogin()" style="width:100%; margin-bottom:12px;">Sign In to Engine</button>
+            <button class="btn-secondary" onclick="handleSignup()" style="width:100%; margin-bottom: 20px;">Provision Instance</button>
             
-            <div style="margin-top: 12px; border-top: 1px solid var(--border); padding-top: 14px;">
-                <a href="javascript:void(0)" onclick="handlePasswordReset()" style="color: var(--muted); font-size: 13px; text-decoration: none;">Forgot or reset password layout?</a>
+            <div style="border-top: 1px solid var(--border); padding-top: 16px; text-align: center;">
+                <a href="javascript:void(0)" onclick="handlePasswordReset()" style="color: var(--text-dim); font-size: 12px; text-decoration: none;">Forgot account routing access configuration?</a>
             </div>
             
-            <p id="auth-msg" style="color: #ef4444; font-size:12px; margin-top:10px; font-weight: 500;"></p>
+            <p id="auth-msg" style="color: var(--error); font-size:12px; margin-top:16px; font-weight: 500; text-align: center;"></p>
         </div>
     </div>
 
-    <!-- Navigation Sidebar Layout Wrapper -->
     <aside>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; padding-bottom: 16px; border-bottom: 1px solid var(--border);">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <svg style="width:22px; height:22px; color:var(--accent);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                <h3 style="color: #fff; margin:0; letter-spacing: 0.5px;">VoltaicMail Pro</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding-bottom: 16px; border-bottom: 1px solid var(--border);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <svg style="width:20px; height:20px; stroke:var(--accent);" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <h3 style="color: #fff; margin:0; font-size: 15px; letter-spacing: -0.01em;">VoltaicMail Pro</h3>
             </div>
-            <button onclick="handleLogout()" style="padding:6px 12px; font-size:12px; background: var(--danger);">Log Out</button>
+            <button class="btn-danger" onclick="handleLogout()" style="padding:6px 12px; font-size:11px;">Exit</button>
         </div>
         
-        <div class="nav-item active" onclick="switchView('metrics')">
+        <div class="nav-item active" onclick="switchView('metrics', this)">
             <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8m-16 0a2 2 0 012-2h12a2 2 0 012 2m-16 0l1.286-6A2 2 0 015.247 4h13.506a2 2 0 011.961 1.6l1.286 6m-16 0h16"/></svg>
             Metrics Page
         </div>
-        <div class="nav-item" onclick="switchView('domains')">
+        <div class="nav-item" onclick="switchView('domains', this)">
             <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 10H5m14 0a9 9 0 01-9 9m9-9a9 9 0 00-9-9m0 18a9 9 0 01-9-9m9 9a9 9 0 009-9m-9 9a9 9 0 019-9m-9 0a9 9 0 00-9-9m0 18a9 9 0 009-9m-9 0a9 9 0 019-9m-9 0H5m14 0a9 9 0 00-9-9m0 18a9 9 0 01-9-9"/></svg>
             Domain Page
         </div>
@@ -260,35 +310,35 @@
         <div class="nav-item" onclick="toggleSubNav('audience-sub')">
             <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m16-10a4 4 0 11-8 0 4 4 0 018 0zm3 10v-2a4 4 0 00-3-3.87m1.42-7.4A4 4 0 1122 8a4 4 0 01-1.58 3.13"/></svg>
             Audience Page
-            <svg style="width:12px; height:12px; margin-left:auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 9l-7 7-7-7"/></svg>
+            <svg style="width:10px; height:10px; margin-left:auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 9l-7 7-7-7"/></svg>
         </div>
         <div id="audience-sub" class="sub-nav">
-            <div class="nav-item" onclick="switchView('contacts')">Contacts Subpage</div>
-            <div class="nav-item" onclick="switchView('properties')">Properties Subpage</div>
-            <div class="nav-item" onclick="switchView('topics')">Topics Subpage</div>
+            <div class="nav-item" onclick="switchView('contacts', this)">Contacts Subpage</div>
+            <div class="nav-item" onclick="switchView('properties', this)">Properties Subpage</div>
+            <div class="nav-item" onclick="switchView('topics', this)">Topics Subpage</div>
         </div>
 
-        <div class="nav-item" onclick="switchView('templates')">
+        <div class="nav-item" onclick="switchView('templates', this)">
             <svg viewBox="0 0 24 24"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
             Template Page
         </div>
-        <div class="nav-item" onclick="switchView('broadcast')">
+        <div class="nav-item" onclick="switchView('broadcast', this)">
             <svg viewBox="0 0 24 24"><path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
             Broadcast Page
         </div>
-        <div class="nav-item" onclick="switchView('automation')">
+        <div class="nav-item" onclick="switchView('automation', this)">
             <svg viewBox="0 0 24 24"><path d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
             Automation Page
         </div>
-        <div class="nav-item" onclick="switchView('logs')">
+        <div class="nav-item" onclick="switchView('logs', this)">
             <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
             Logs Page
         </div>
-        <div class="nav-item" onclick="switchView('api')">
+        <div class="nav-item" onclick="switchView('api', this)">
             <svg viewBox="0 0 24 24"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
             API Page
         </div>
-        <div class="nav-item" onclick="switchView('webhook')">
+        <div class="nav-item" onclick="switchView('webhook', this)">
             <svg viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
             Webhook Page
         </div>
@@ -296,25 +346,24 @@
         <div class="nav-item" onclick="toggleSubNav('settings-sub')">
             <svg viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             Settings Page
-            <svg style="width:12px; height:12px; margin-left:auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 9l-7 7-7-7"/></svg>
+            <svg style="width:10px; height:10px; margin-left:auto;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 9l-7 7-7-7"/></svg>
         </div>
         <div id="settings-sub" class="sub-nav">
-            <div class="nav-item" onclick="switchView('usage')">Usage Document</div>
-            <div class="nav-item" onclick="switchView('billing')">Billing Document</div>
-            <div class="nav-item" onclick="switchView('team')">Team Document</div>
-            <div class="nav-item" onclick="switchView('smtp')">SMTP Config</div>
-            <div class="nav-item" onclick="switchView('integration')">Integration Doc</div>
-            <div class="nav-item" onclick="switchView('unsubscribe')">Unsubscribe Page</div>
-            <div class="nav-item" onclick="switchView('documents')">Master Documents</div>
+            <div class="nav-item" onclick="switchView('usage', this)">Usage Document</div>
+            <div class="nav-item" onclick="switchView('billing', this)">Billing Document</div>
+            <div class="nav-item" onclick="switchView('team', this)">Team Document</div>
+            <div class="nav-item" onclick="switchView('smtp', this)">SMTP Config</div>
+            <div class="nav-item" onclick="switchView('integration', this)">Integration Doc</div>
+            <div class="nav-item" onclick="switchView('unsubscribe', this)">Unsubscribe Page</div>
+            <div class="nav-item" onclick="switchView('documents', this)">Master Documents</div>
         </div>
 
-        <div class="nav-item" onclick="switchView('help')" style="margin-top:auto; background:#1e293b; color:#fff;">
+        <div class="nav-item" onclick="switchView('help', this)" style="margin-top:auto; background:var(--panel-raised); color:#fff;">
             <svg viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            Help Page
+            Help Desk Matrix
         </div>
     </aside>
 
-    <!-- Main Workspace Frame -->
     <main>
         <div id="view-metrics" class="panel-content">
             <h2>Real Details Delivery Metrics Matrix</h2>
@@ -330,20 +379,20 @@
             </div>
             <div class="grid">
                 <div class="card">
-                    <p style="color:var(--muted); font-size:13px; font-weight:600; margin:0 0 8px 0; text-transform:uppercase;">Emails Streamed</p>
-                    <h1 id="met-emails" style="margin:0; font-size:32px; font-weight:700;">0</h1>
+                    <p style="color:var(--text-dim); font-size:11px; font-weight:600; margin:0 0 8px 0; text-transform:uppercase; letter-spacing: 0.05em;">Emails Streamed</p>
+                    <h1 id="met-emails" style="margin:0; font-size:28px; font-weight:500; letter-spacing: -0.02em;">0</h1>
                 </div>
                 <div class="card">
-                    <p style="color:var(--muted); font-size:13px; font-weight:600; margin:0 0 8px 0; text-transform:uppercase;">Deliverability Rate</p>
-                    <h1 id="met-deliver" style="margin:0; font-size:32px; font-weight:700; color:var(--success);">100.00%</h1>
+                    <p style="color:var(--text-dim); font-size:11px; font-weight:600; margin:0 0 8px 0; text-transform:uppercase; letter-spacing: 0.05em;">Deliverability Rate</p>
+                    <h1 id="met-deliver" style="margin:0; font-size:28px; font-weight:500; color:var(--success); letter-spacing: -0.02em;">100.00%</h1>
                 </div>
                 <div class="card">
-                    <p style="color:var(--muted); font-size:13px; font-weight:600; margin:0 0 8px 0; text-transform:uppercase;">Bounce Rate</p>
-                    <h1 id="met-bounce" style="margin:0; font-size:32px; font-weight:700; color:var(--danger);">0.00%</h1>
+                    <p style="color:var(--text-dim); font-size:11px; font-weight:600; margin:0 0 8px 0; text-transform:uppercase; letter-spacing: 0.05em;">Bounce Rate</p>
+                    <h1 id="met-bounce" style="margin:0; font-size:28px; font-weight:500; color:var(--danger); letter-spacing: -0.02em;">0.00%</h1>
                 </div>
                 <div class="card">
-                    <p style="color:var(--muted); font-size:13px; font-weight:600; margin:0 0 8px 0; text-transform:uppercase;">Complaint Rate</p>
-                    <h1 id="met-complaint" style="margin:0; font-size:32px; font-weight:700; color:#ea580c;">0.00%</h1>
+                    <p style="color:var(--text-dim); font-size:11px; font-weight:600; margin:0 0 8px 0; text-transform:uppercase; letter-spacing: 0.05em;">Complaint Rate</p>
+                    <h1 id="met-complaint" style="margin:0; font-size:28px; font-weight:500; color:var(--warning); letter-spacing: -0.02em;">0.00%</h1>
                 </div>
             </div>
         </div>
@@ -355,7 +404,7 @@
                 <button onclick="addDomain()">Create Domain</button>
             </div>
             <div class="card">
-                <h3 style="margin-bottom:16px; color:var(--muted);">Active Verified Matrix (AWS Hosted Zone Namespace Bind Status)</h3>
+                <h3 style="margin-bottom:16px; color:var(--text-muted);">Active Verified Matrix (AWS Hosted Zone Namespace Bind Status)</h3>
                 <div class="table-container">
                     <table>
                         <thead><tr><th>Domain URL String</th><th>Status</th><th>Connected Time Record</th><th>Action</th></tr></thead>
@@ -426,11 +475,11 @@
         <div id="view-broadcast" class="panel-content" style="display:none;">
             <h2>Mass Marketing & Transactional Broadcast Control</h2>
             <div class="card">
-                <label style="font-size:13px; color:var(--muted); font-weight:600; text-transform:uppercase;">Select Verified Sending Domain Routing Core:</label><br>
+                <label style="font-size:12px; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Select Verified Sending Domain Routing Core:</label><br>
                 <select id="broad-dom" style="margin-top:6px; margin-bottom:16px;"></select><br>
                 <input type="text" id="broad-sub" placeholder="Broadcast Run Subject String Override" style="margin-bottom:16px;"><br>
                 <textarea id="broad-html" placeholder="Type personal message or inject personalization tokens dynamically like {{first_name}}" style="height:160px;"></textarea><br>
-                <button onclick="dispatchBroadcast()" style="background:#ea580c; width:100%; margin-top:10px;">Execute Real-Time Synchronized Campaign Run Now</button>
+                <button onclick="dispatchBroadcast()" style="width:100%; margin-top:10px;">Execute Real-Time Synchronized Campaign Run Now</button>
             </div>
         </div>
 
@@ -454,7 +503,7 @@
         <div id="view-logs" class="panel-content" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
                 <h2>System Delivery Endpoint Execution Logs</h2>
-                <button onclick="window.open('/api/logs/export')" style="background:#4d7c0f;">Export Historical System Logs (CSV)</button>
+                <button onclick="window.open('/api/logs/export')" style="font-size: 13px;">Export Historical System Logs (CSV)</button>
             </div>
             <div class="card">
                 <div style="margin-bottom:16px;">
@@ -472,7 +521,7 @@
         <div id="view-api" class="panel-content" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h2>Developer Token Access Key Profiles</h2>
-                <button onclick="window.open('/api/keys/export')" style="background:#0369a1;">Export Registry Map CSV</button>
+                <button onclick="window.open('/api/keys/export')" style="font-size: 13px;">Export Registry Map CSV</button>
             </div>
             <div class="card" style="display:flex; gap:12px;">
                 <input type="text" id="api-name-in" placeholder="Token Name Application Interface" style="max-width:300px;">
@@ -505,16 +554,15 @@
         <div id="view-team" class="panel-content" style="display:none;"><h2>Team Access Configuration Management</h2><div class="card"><p><b>Owner:</b> system-admin-pipeline@voltaicmail.xyz (Full Workspace Access Rights Overwrite Master Bound).</p></div></div>
         <div id="view-smtp" class="panel-content" style="display:none;"><h2>System Internal SMTP Relay Overwrite Maps</h2><div class="card"><p><b>Host Address Endpoint Network:</b> 127.0.0.1 Loopback Routing System Port Forward Block 2525 operational execution pipeline.</p></div></div>
         
-        <!-- Terminal-Install Core Framework Layout -->
         <div id="view-integration" class="panel-content" style="display:none;">
             <h2>System API Technical Core Framework Integrations</h2>
             <div class="card">
-                <h3 style="color:var(--accent); margin-bottom:8px;">Global Terminal Binary System Installation</h3>
-                <p style="color:var(--muted); font-size:13px; margin-bottom:12px;">To provision or mount VoltaicMail directly into your remote environment pipeline run:</p>
-                <pre style="background:#1e293b; padding:15px; border-radius:6px; margin-bottom:24px; color:#fff;">curl -sSL http://13.48.136.173:3000/install.sh | bash</pre>
-
-                <h3>Node Package Module Setup:</h3>
-                <pre style="background:#1e293b; padding:15px; border-radius:6px;">npm install voltaicmail</pre>
+                <h3 style="color:var(--text); margin-bottom:12px;">Global Terminal Binary System Installation</h3>
+                <p style="color:var(--text-muted); font-size:13px; margin-bottom:12px;">To provision or mount VoltaicMail directly into your remote environment pipeline run:</p>
+                <pre>curl -sSL http://13.48.136.173:3000/install.sh | bash</pre>
+                <br>
+                <h3 style="margin-bottom:12px;">Node Package Module Setup:</h3>
+                <pre>npm install voltaicmail</pre>
             </div>
         </div>
         
@@ -523,9 +571,9 @@
         <div id="view-documents" class="panel-content" style="display:none;">
             <h2>VoltaicMail Technical System Master Documents Library Layout</h2>
             <div class="card">
-                <h3>Transactional Campaign SDK Implementation Matrix</h3>
-                <p>Accelerate mass production deployments instantly by pulling our custom system modules right inside standard JavaScript framework blocks easily:</p>
-                <pre style="background:#1e293b; padding:15px; border-radius:6px; color:#a7f3d0;">
+                <h3 style="margin-bottom:12px;">Transactional Campaign SDK Implementation Matrix</h3>
+                <p style="color:var(--text-muted); font-size: 13px; margin-bottom:12px;">Accelerate mass production deployments instantly by pulling our custom system modules right inside standard JavaScript framework blocks easily:</p>
+                <pre>
 const VoltaicMail = require('voltaicmail');
 const vm = new VoltaicMail('YOUR_SECRET_GENERATED_API_TOKEN_KEY');
 
@@ -541,35 +589,48 @@ vm.send({
         <div id="view-help" class="panel-content" style="display:none;">
             <h2>VoltaicMail System Help Desk Core Infrastructure Documentation</h2>
             <div class="card">
-                <h3>Technical Infrastructure Engine Support Portal</h3>
+                <h3 style="margin-bottom:12px;">Technical Infrastructure Engine Support Portal</h3>
                 <p>Our routing program maximizes performance limits across high-capacity mass transactional or automated campaign deployments seamlessly.</p>
-                <p><b>AWS EC2 Routing Node Bind Location:</b> 13.48.136.173 Node Process Core.</p>
-                <p>For urgent engineering diagnostics, contact deep core dev assistance via system infrastructure controls.</p>
+                <p style="color: var(--text-muted); font-size: 13px;"><b>AWS EC2 Routing Node Bind Location:</b> 13.48.136.173 Node Process Core.</p>
+                <p style="color: var(--text-muted); font-size: 13px;">For urgent engineering diagnostics, contact deep core dev assistance via system infrastructure controls.</p>
             </div>
         </div>
     </main>
 
     <script>
         let currentUser = null;
-        function toggleSubNav(id) { document.getElementById(id).classList.toggle('open'); }
+        
+        function toggleSubNav(id) { 
+            document.getElementById(id).classList.toggle('open'); 
+        }
         
         function togglePasswordVisibility(fieldId) {
             const inputField = document.getElementById(fieldId);
+            const icon = document.getElementById(fieldId + '-icon');
             if (inputField.type === "password") {
                 inputField.type = "text";
+                if(icon) {
+                    icon.innerHTML = `
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                    `;
+                }
             } else {
                 inputField.type = "password";
+                if(icon) {
+                    icon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+                }
             }
         }
 
         async function handlePasswordReset() {
             const email = document.getElementById('auth-email').value;
             if (!email) {
-                document.getElementById('auth-msg').innerText = "Please provide an email address layout configuration first.";
+                document.getElementById('auth-msg').innerText = "Please provide an email address configuration first.";
                 return;
             }
-            document.getElementById('auth-msg').style.color = "var(--accent)";
-            document.getElementById('auth-msg').innerText = "Routing secure recovery token layout configuration payload...";
+            document.getElementById('auth-msg').style.color = "var(--text)";
+            document.getElementById('auth-msg').innerText = "Routing secure recovery token payload...";
             
             try {
                 const res = await fetch('/api/auth/reset-password', {
@@ -584,28 +645,27 @@ vm.send({
             }
         }
 
-        function switchView(viewId) {
+        function switchView(viewId, element) {
             document.querySelectorAll('.panel-content').forEach(el => el.style.display = 'none');
             const target = document.getElementById('view-' + viewId);
             if(target) target.style.display = 'block';
+            
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            if(element) element.classList.add('active');
         }
 
-        // Generic mock baseline triggers to keep framework errors clear
-        function handleLogin() { document.getElementById('auth-gate').style.display='none'; }
-        function handleSignup() { }
-        function handleLogout() { document.getElementById('auth-gate').style.display='flex'; }
-        function syncMetrics() {}
-        function addDomain() {}
-        function addContact() {}
-        function addProperty() {}
-        function addTopic() {}
-        function saveTemplate() {}
-        function dispatchBroadcast() {}
-        function addAutomation() {}
-        function createTokenKey() {}
-        function addWebhook() {}
+        function handleLogout() {
+            document.getElementById('auth-gate').style.display = 'flex';
+        }
+
+        function handleLogin() {
+            // Simulated login closure sequence
+            document.getElementById('auth-gate').style.display = 'none';
+        }
+
+        function handleSignup() {
+            document.getElementById('auth-msg').innerText = "Simulator mode: Please sign in directly.";
+        }
     </script>
 </body>
 </html>
